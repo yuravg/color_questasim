@@ -1,0 +1,51 @@
+# colorquestasim configuration file
+#
+# This file should be named $HOME/.colorquestasim or
+# $HOME/.colorquestasim_<os_type>
+# <os_type> you can find out by running the command: perl -e 'print "$^O\n"'
+#
+#
+# The following groups of attributes may be combined for a given color:
+#
+# clear         black      on_black
+# reset         red        on_red
+# bold          green      on_green
+# underline     yellow     on_yellow
+# underscore    blue       on_blue
+# blink         magenta    on_magenta
+# reverse       cyan       on_cyan
+# concealed     white      on_white
+#
+# For example, warning_message_color: bold cyan on_yellow
+#
+
+# Define the path for 'vlog' if you don't want to use the path from the PATH
+# environment variable
+# vlog: /opt/mentor/questasim_10.7c/questasim/bin/vlog
+
+# Don't do color if our terminal type ($TERM) is one of these.
+# (List all terminal types on one line, seperated by whitespace.)
+# nocolor: dump xterm xterm-256color emacs
+
+# Notes
+note_head_color: bold blue
+note_fname_color: cyan
+note_line_num_color: cyan
+note_message_color: bold blue
+
+# Errors
+error_head_color: bold red
+error_fname_color: red
+error_line_num_color: blue
+error_message_color: cyan
+
+# Warnings
+warning_head_color: yellow
+warning_fname_color: yellow
+warning_line_num_color: blue
+warning_message_color: cyan
+
+# vsim parser configuration
+show_copyright: no
+show_cmd_echo: true
+show_run_length: true
