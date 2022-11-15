@@ -34,15 +34,15 @@ sub init_defaults
 {
     $nocolor{"dumb"} = "true";
 
-    $colors{"warningHeadColor"}     = color("yellow");
-    $colors{"warningFileNameColor"} = color("cyan");
-    $colors{"warningLineNumColor"}  = color("cyan");
-    $colors{"warningMessage"}       = color("cyan");
+    $colors{"warning_head_color"}     = color("yellow");
+    $colors{"warning_fname_color"}    = color("cyan");
+    $colors{"warning_line_num_color"} = color("cyan");
+    $colors{"warning_message_color"}  = color("cyan");
 
-    $colors{"errorHeadColor"}       = color("red");
-    $colors{"errorFileNameColor"}   = color("cyan");
-    $colors{"errorLineNumColor"}    = color("cyan");
-    $colors{"errorMessage"}         = color("cyan");
+    $colors{"error_head_color"}       = color("red");
+    $colors{"error_fname_color"}      = color("cyan");
+    $colors{"error_line_num_color"}   = color("cyan");
+    $colors{"error_message_color"}          = color("cyan");
 }
 
 sub load_configuration
@@ -184,27 +184,27 @@ sub vlog_scan {
 
         print $field1;
         if ($error_type) {
-            print($colors{"errorHeadColor"}, "$field2", color("reset"));
+            print($colors{"error_head_color"}, "$field2", color("reset"));
         } else {
-            print($colors{"warningHeadColor"}, "$field2", color("reset"));
+            print($colors{"warning_head_color"}, "$field2", color("reset"));
         }
         print $field3, $field4, $field5;
         if ($error_type) {
-            print($colors{"errorFileNameColor"}, "$field6", color("reset"));
+            print($colors{"error_fname_color"}, "$field6", color("reset"));
         } else {
-            print($colors{"warningFileNameColor"}, "$field6", color("reset"));
+            print($colors{"warning_fname_color"}, "$field6", color("reset"));
         }
         print $field7;
         if ($error_type) {
-            print($colors{"errorLineNumColor"}, "$field8", color("reset"));
+            print($colors{"error_line_num_color"}, "$field8", color("reset"));
         } else {
-            print($colors{"warningLineNumColor"}, "$field8", color("reset"));
+            print($colors{"warning_line_num_color"}, "$field8", color("reset"));
         }
         print $field9, $field10, $field11;
         if ($error_type) {
-            print($colors{"errorMessage"}, "$field12\n", color("reset"));
+            print($colors{"error_message_color"}, "$field12\n", color("reset"));
         } else {
-            print($colors{"warningMessage"}, "$field12\n", color("reset"));
+            print($colors{"warning_message_color"}, "$field12\n", color("reset"));
         }
         1;
     } elsif (/^(\*\*\s+)
@@ -227,12 +227,12 @@ sub vlog_scan {
         my $field7   = $7 || "";
         my $field8   = $8 || "";
         print $field1;
-        print($colors{"errorHeadColor"}, "$field2", color("reset"));
+        print($colors{"error_head_color"}, "$field2", color("reset"));
         print $field3;
-        print($colors{"errorMessage"}, "$field4", color("reset"));
-        print($colors{"errorFileNameColor"}, "$field5", color("reset"));
+        print($colors{"error_message_color"}, "$field4", color("reset"));
+        print($colors{"error_fname_color"}, "$field5", color("reset"));
         print $field6;
-        print($colors{"errorLineNumColor"}, "$field7", color("reset"));
+        print($colors{"error_line_num_color"}, "$field7", color("reset"));
         print $field8, "\n";
         1;
     } elsif (/^(\*\*\s+)
@@ -256,12 +256,12 @@ sub vlog_scan {
         my $field7   = $7 || "";
         my $field8   = $8 || "";
         print $field1;
-        print($colors{"errorHeadColor"}, "$field2", color("reset"));
-        print($colors{"errorFileNameColor"}, "$field3", color("reset"));
+        print($colors{"error_head_color"}, "$field2", color("reset"));
+        print($colors{"error_fname_color"}, "$field3", color("reset"));
         print $field4;
-        print($colors{"errorLineNumColor"}, "$field5", color("reset"));
+        print($colors{"error_line_num_color"}, "$field5", color("reset"));
         print $field6, $field7;
-        print($colors{"errorMessage"}, "$field8\n", color("reset"));
+        print($colors{"error_message_color"}, "$field8\n", color("reset"));
         1;
     } elsif (/^(Errors:\s+)
               ([0-9]+)
@@ -279,13 +279,13 @@ sub vlog_scan {
         my $field4    = $4 || "";
         my $warning_num  = int($5) || 0;
         if ($error_num > 0) {
-            print($colors{"errorHeadColor"}, "${field1}$error_num", color("reset"));
+            print($colors{"error_head_color"}, "${field1}$error_num", color("reset"));
         } else {
             print $field1, $error_num;
         }
         print $field3;
         if ($warning_num > 0) {
-            print($colors{"warningHeadColor"}, "${field4}$warning_num", color("reset"));
+            print($colors{"warning_head_color"}, "${field4}$warning_num", color("reset"));
         } else {
             print $field4, $warning_num;
         }
@@ -315,14 +315,14 @@ sub vopt_scan {
         my $field6   = $6 || "";
 
         print $field1;
-        print($colors{"errorHeadColor"}, "$field2", color("reset"));
+        print($colors{"error_head_color"}, "$field2", color("reset"));
         print $field3, $field4, $field5, $field6, "\n";
         1;
     } elsif (/^(No such file or directory.*)$/) {
-        print($colors{"errorHeadColor"}, $1, color("reset"), "\n");
+        print($colors{"error_head_color"}, $1, color("reset"), "\n");
         1;
     } elsif (/^(Optimization failed*)$/) {
-        print($colors{"errorHeadColor"}, $1, color("reset"), "\n");
+        print($colors{"error_head_color"}, $1, color("reset"), "\n");
         1;
     } else {
         0;                      # no matches found
