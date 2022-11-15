@@ -37,10 +37,12 @@ sub init_defaults
     $colors{"warningHeadColor"}     = color("yellow");
     $colors{"warningFileNameColor"} = color("cyan");
     $colors{"warningLineNumColor"}  = color("cyan");
+    $colors{"warningMessage"}       = color("cyan");
 
     $colors{"errorHeadColor"}       = color("red");
     $colors{"errorFileNameColor"}   = color("cyan");
     $colors{"errorLineNumColor"}    = color("cyan");
+    $colors{"errorMessage"}         = color("cyan");
 }
 
 sub load_configuration
@@ -133,11 +135,21 @@ my $output;
 my $cmd_pid = open3('<&STDIN', $output, '>&STDERR', $cmd, @ARGV);
 
 while (<$output>) {
-    # 'vlog' messages:
-    # "** Error: (vlog-Num) file_name.sv(LineNum): Message."
-    # "** Error: file_name.sv(LineNum): (vlog-Num) Message."
-    # "** Error (Note): file-name.sv(LineNum): (vlog-Num) Message."
-    if (/(^\*\*\s+)
+    if (vlog_scan($_)) {
+    } elsif (vopt_scan($_)) {
+    } else {
+        print;
+    }
+}
+
+if ($cmd_pid) {
+    waitpid($cmd_pid, 0);
+    exit ($? >> 8);
+}
+
+
+sub vlog_scan {
+    if (/^(\*\*\s+)
          # Title
          (Error|Warning)
          (\s+\([^)]+\))?
@@ -145,10 +157,17 @@ while (<$output>) {
          (\([^)]+\)\s+)?
          # File name
          ([A-z0-9._\/-]+)
-         # Line number
+         # Line number and round brackets
          (\()([0-9]+)(\))
+         (:)
+         # vlog Num
+         (\s+\([^)]+\))?
          # Message
-         (:.*)$/x) {
+         (.*)$/x) {
+        # 'vlog' messages:
+        # "** Error: (vlog-Num) file_name.sv(LineNum): Message."
+        # "** Error: file_name.sv(LineNum): (vlog-Num) Message."
+        # "** Error (Note): file-name.sv(LineNum): (vlog-Num) Message."
         my $field1   = $1 || "";
         my $field2   = $2 || "";
         my $field3   = $3 || "";
@@ -159,6 +178,8 @@ while (<$output>) {
         my $field8   = $8 || "";
         my $field9   = $9 || "";
         my $field10  = $10 || "";
+        my $field11  = $11 || "";
+        my $field12  = $12 || "";
         my $error_type = $field2 eq "Error";
 
         print $field1;
@@ -179,16 +200,77 @@ while (<$output>) {
         } else {
             print($colors{"warningLineNumColor"}, "$field8", color("reset"));
         }
-        print $field9, $field10, "\n";
-    } elsif (/(^Errors:\s+)
+        print $field9, $field10, $field11;
+        if ($error_type) {
+            print($colors{"errorMessage"}, "$field12\n", color("reset"));
+        } else {
+            print($colors{"warningMessage"}, "$field12\n", color("reset"));
+        }
+        1;
+    } elsif (/^(\*\*\s+)
+              (Error)
+              (:\s+\([^)]+\)\s+)
+              (\*\*\s+while\s+parsing\s+file\s+included\s+at\s+)
+              # File name
+              ([A-z0-9._\/-]+)
+              # Line number and round brackets
+              (\()([0-9]+)(\))
+              $/x) {
+        # 'vlog' message:
+        # "** Error: (vlog-Num) ** while parsing file included at file_name.sv(LineNum)"
+        my $field1   = $1 || "";
+        my $field2   = $2 || "";
+        my $field3   = $3 || "";
+        my $field4   = $4 || "";
+        my $field5   = $5 || "";
+        my $field6   = $6 || "";
+        my $field7   = $7 || "";
+        my $field8   = $8 || "";
+        print $field1;
+        print($colors{"errorHeadColor"}, "$field2", color("reset"));
+        print $field3;
+        print($colors{"errorMessage"}, "$field4", color("reset"));
+        print($colors{"errorFileNameColor"}, "$field5", color("reset"));
+        print $field6;
+        print($colors{"errorLineNumColor"}, "$field7", color("reset"));
+        print $field8, "\n";
+        1;
+    } elsif (/^(\*\*\s+)
+              (at\s+)
+              # File name
+              ([A-z0-9._\/-]+)
+              # Line number and round brackets
+              (\()([0-9]+)(\))
+              (:)
+              # Message
+              (.*)
+              $/x) {
+        # 'vlog' message:
+        # "** at file_name.sv(LineNum): Message.
+        my $field1   = $1 || "";
+        my $field2   = $2 || "";
+        my $field3   = $3 || "";
+        my $field4   = $4 || "";
+        my $field5   = $5 || "";
+        my $field6   = $6 || "";
+        my $field7   = $7 || "";
+        my $field8   = $8 || "";
+        print $field1;
+        print($colors{"errorHeadColor"}, "$field2", color("reset"));
+        print($colors{"errorFileNameColor"}, "$field3", color("reset"));
+        print $field4;
+        print($colors{"errorLineNumColor"}, "$field5", color("reset"));
+        print $field6, $field7;
+        print($colors{"errorMessage"}, "$field8\n", color("reset"));
+        1;
+    } elsif (/^(Errors:\s+)
               ([0-9]+)
               (,\s+)
               (Warnings:\s+)
               ([0-9]+)
-              # To support MinGW only:
+              # Only for MinGW:
               (\s*)
-              $
-             /x) {
+              $/x) {
         # 'vlog' messages:
         # "Errors: Num, Warnings: Num"
         my $field1    = $1 || "";
@@ -208,13 +290,20 @@ while (<$output>) {
             print $field4, $warning_num;
         }
         print "\n";
-    } elsif (/(^\*\*\s+)
-              # Title
-              (Error)
-              (:)?
-              (\s+\([^)]+\))
-              (:)?
-              (.*)$/x) {
+        1;
+    } else {
+        0;                      # no matches found
+    }
+}
+
+sub vopt_scan {
+    if (/^(\*\*\s+)
+         # Title
+         (Error)
+         (:)?
+         (\s+\([^)]+\))
+         (:)?
+         (.*)$/x) {
         # 'vopt' message
         # "** Error (Note): (vopt-Num) Message."
         # "** Error: (vopt-Num) Message."
@@ -228,17 +317,14 @@ while (<$output>) {
         print $field1;
         print($colors{"errorHeadColor"}, "$field2", color("reset"));
         print $field3, $field4, $field5, $field6, "\n";
+        1;
     } elsif (/^(No such file or directory.*)$/) {
         print($colors{"errorHeadColor"}, $1, color("reset"), "\n");
+        1;
     } elsif (/^(Optimization failed*)$/) {
         print($colors{"errorHeadColor"}, $1, color("reset"), "\n");
+        1;
     } else {
-        print;
+        0;                      # no matches found
     }
-}
-
-
-if ($cmd_pid) {
-    waitpid($cmd_pid, 0);
-    exit ($? >> 8);
 }
