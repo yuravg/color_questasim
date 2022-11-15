@@ -111,6 +111,11 @@ my $config_file = $ENV{"HOME"} . "/.colorquestasim";
 if (-f $config_file) {
     load_configuration($config_file);
 }
+my $os_type = lc("$^O");
+my $config_file_os = $ENV{"HOME"} . "/.colorquestasim" . "_$os_type";
+if (-f $config_file_os) {
+    load_configuration($config_file_os);
+}
 
 my $cmd = $cmdPaths{$prog_name} || find_path($prog_name);
 
