@@ -144,9 +144,9 @@ my $output;
 my $cmd_pid = open3('<&STDIN', $output, '>&STDERR', $cmd, @ARGV);
 
 while (<$output>) {
-    if (vlog_scan($_)) {
-    } elsif (vopt_scan($_)) {
-    } elsif (vsim_scan($_)) {
+    if ($prog_name eq "vlog" && vlog_scan($_)) {
+    } elsif ($prog_name eq "vopt" && vopt_scan($_)) {
+    } elsif ($prog_name eq "vsim" && vsim_scan($_)) {
     } else {
         print;
     }
