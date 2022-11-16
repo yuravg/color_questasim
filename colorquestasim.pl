@@ -22,8 +22,8 @@ use strict;
 
 use List::Util 'first';
 use IPC::Open3 'open3';
-use File::Basename;
-use File::Spec;
+use File::Basename 'fileparse';
+use File::Spec '';
 use Cwd 'abs_path';
 use Term::ANSIColor 'color';
 
@@ -72,12 +72,14 @@ sub load_configuration
 }
 
 # From: https://github.com/colorgcc/
-sub unique{
+sub unique
+{
     my %seen = ();
     grep {! $seen{$_ }++} @_;
 }
 
-sub can_execute{
+sub can_execute
+{
     warn "$_ is found but is not executable; skipping." if -e !-x;
     -x
 }
@@ -87,16 +89,16 @@ sub can_execute{
 sub find_path
 {
     my $program = shift;
+    my $program_path = $0;
 
     # Load the path
     my @path = File::Spec->path();
 
-    #join paths with program name and get absolute path
-    @path = unique map {grep defined($_), abs_path(File::Spec->join($_, $program))} @path;
-    my $progPath = abs_path($0);
+    # join paths with program name and get absolute path
+    @path = unique map {grep defined($_), File::Spec->join($_, $program)} @path;
 
     # Find first file spec in paths, that is not current program's file spec; is executable
-    return first {$_ ne $progPath and can_execute($_)} @path;
+    return first {$_ ne $program_path and can_execute($_)} @path;
 }
 
 #
