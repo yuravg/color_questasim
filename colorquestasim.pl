@@ -26,13 +26,17 @@ use File::Basename 'fileparse';
 use File::Spec '';
 use Cwd 'abs_path';
 use Term::ANSIColor 'color';
+use feature 'state';
 
 
-my(%nocolor, %colors, %cmdPaths);
+my(%nocolor, %colors, %cmdPaths, %vsim_cfg);
 
 sub init_defaults
 {
     $nocolor{"dumb"} = "true";
+
+    $colors{"note_head_color"}        = color("blue");
+    $colors{"note_message_color"}     = color("blue");
 
     $colors{"warning_head_color"}     = color("yellow");
     $colors{"warning_fname_color"}    = color("cyan");
@@ -42,7 +46,11 @@ sub init_defaults
     $colors{"error_head_color"}       = color("red");
     $colors{"error_fname_color"}      = color("cyan");
     $colors{"error_line_num_color"}   = color("cyan");
-    $colors{"error_message_color"}          = color("cyan");
+    $colors{"error_message_color"}    = color("cyan");
+
+    $vsim_cfg{"show_copyright"} = "true";
+    $vsim_cfg{"show_cmd_echo"} = "true";
+    $vsim_cfg{"show_run_length"} = "true";
 }
 
 sub load_configuration
@@ -137,6 +145,7 @@ my $cmd_pid = open3('<&STDIN', $output, '>&STDERR', $cmd, @ARGV);
 while (<$output>) {
     if (vlog_scan($_)) {
     } elsif (vopt_scan($_)) {
+    } elsif (vsim_scan($_)) {
     } else {
         print;
     }
@@ -147,6 +156,10 @@ if ($cmd_pid) {
     exit ($? >> 8);
 }
 
+
+#
+# Parsers
+#
 
 sub vlog_scan {
     if (/^(\*\*\s+)
@@ -168,6 +181,7 @@ sub vlog_scan {
         # "** Error: (vlog-Num) file_name.sv(LineNum): Message."
         # "** Error: file_name.sv(LineNum): (vlog-Num) Message."
         # "** Error (Note): file-name.sv(LineNum): (vlog-Num) Message."
+
         my $field1   = $1 || "";
         my $field2   = $2 || "";
         my $field3   = $3 || "";
@@ -323,6 +337,93 @@ sub vopt_scan {
         1;
     } elsif (/^(Optimization failed*)$/) {
         print($colors{"error_head_color"}, $1, color("reset"), "\n");
+        1;
+    } else {
+        0;                      # no matches found
+    }
+}
+
+sub vsim_scan {
+    state $copyrigth_msg = 1;
+
+    if ($copyrigth_msg) {
+        if (/^#\s+run\s+/) {
+            $copyrigth_msg = 0;
+            if ($vsim_cfg{"show_copyright"} eq "true" ||
+                $vsim_cfg{"show_run_length"} eq "true") {
+                print;
+            }
+            1;
+        } else {
+            if ($vsim_cfg{"show_copyright"} eq "true") {
+                print;
+                1;
+            } else {
+                if ($vsim_cfg{"show_cmd_echo"} eq "true" && /^#\s+vsim\s+.*$/) {
+                    print;
+                }
+                1;              # hide copyright message
+            }
+        }
+    } elsif (/^(\#\s+\*\*\s+)
+              # Title
+              (Fatal:|Error:|Warning:|Note:|Info:)
+              # Message
+              (.*)/x) {
+        my $field1   = $1 || "";
+        my $field2   = $2 || "";
+        my $field3   = $3 || "";
+        my $warning_type = $field2 eq "Warning:";
+        my $note_type = $field2 eq "Note:" || $field2 eq "Info:";
+
+        print $field1;
+        if ($note_type) {
+            print($colors{"note_head_color"}, "$field2", color("reset"));
+        } elsif ($warning_type) {
+            print($colors{"warning_head_color"}, "$field2", color("reset"));
+        } else {
+            print($colors{"error_head_color"}, "$field2", color("reset"));
+        }
+        if ($note_type) {
+            print($colors{"note_message_color"}, "$field3", color("reset"));
+        } elsif ($warning_type) {
+            print($colors{"warning_message_color"}, "$field3", color("reset"));
+        } else {
+            print($colors{"error_message_color"}, "$field3", color("reset"));
+        }
+        print "\n";
+        1;
+    } elsif (/^(\#\s+)
+              (Errors:\s+)
+              ([0-9]+)
+              (,\s+)
+              (Warnings:\s+)
+              ([0-9]+)
+              # Only for MinGW:
+              (\s*)
+              $/x) {
+        # 'vsim' messages:
+        # "# Errors: Num, Warnings: Num"
+        my $field1    = $1 || "";
+        my $field2    = $2 || "";
+        my $error_num = int($3) || 0;
+        my $field4    = $4 || "";
+        my $field5    = $5 || "";
+        my $warning_num  = int($6) || 0;
+
+        print $field1;
+        if ($error_num > 0) {
+            print($colors{"error_head_color"}, "${field2}$error_num", color("reset"));
+        } else {
+            print $field2, $error_num;
+        }
+        print $field4;
+        if ($warning_num > 0) {
+            print($colors{"warning_head_color"}, "${field5}$warning_num", color("reset"));
+        } else {
+            print $field5, $warning_num;
+        }
+        print "\n";
         1;
     } else {
         0;                      # no matches found
