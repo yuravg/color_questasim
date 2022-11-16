@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 0.0.0
+# Version: 1.0.0
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
