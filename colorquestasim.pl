@@ -184,7 +184,6 @@ sub vlog_scan {
         # "** Error: (vlog-Num) file_name.sv(LineNum): Message."
         # "** Error: file_name.sv(LineNum): (vlog-Num) Message."
         # "** Error (Note): file-name.sv(LineNum): (vlog-Num) Message."
-
         my $field1   = $1 || "";
         my $field2   = $2 || "";
         my $field3   = $3 || "";
@@ -234,16 +233,22 @@ sub vlog_scan {
         }
         1;
     } elsif (/^(\*\*\s+)
-              (Error)
-              (:\s+\([^)]+\)\s+)
+              (Error|Warning)
+              (:\s+|\s+\(suppressible\):\s+)
+              (\([^)]+\)\s+)?
               (\*\*\s+while\s+parsing\s+file\s+included\s+at\s+)
               # File name
               ([A-z0-9._\/-]+)
               # Line number and round brackets
               (\()([0-9]+)(\))
+              # Only for MinGW:
+              (\s*)
               $/x) {
-        # 'vlog' message:
+        # 'vlog' messages:
         # "** Error: (vlog-Num) ** while parsing file included at file_name.sv(LineNum)"
+        # "** Error (suppressible): ** while parsing file included at file_name.sv(LineNum)"
+        # "** Error: ** while parsing file included at file_name.sv(LineNum)"
+        # "** Warning: ** while parsing file included at file_name.sv(LineNum)"
         my $field1   = $1 || "";
         my $field2   = $2 || "";
         my $field3   = $3 || "";
@@ -252,14 +257,32 @@ sub vlog_scan {
         my $field6   = $6 || "";
         my $field7   = $7 || "";
         my $field8   = $8 || "";
+        my $field9   = $9 || "";
+        my $error_type = $field2 eq "Error";
         print $field1;
-        print($colors{"error_head_color"}, "$field2", color("reset"));
-        print $field3;
-        print($colors{"error_message_color"}, "$field4", color("reset"));
-        print($colors{"error_fname_color"}, "$field5", color("reset"));
-        print $field6;
-        print($colors{"error_line_num_color"}, "$field7", color("reset"));
-        print $field8, "\n";
+        if ($error_type) {
+            print($colors{"error_head_color"}, "$field2", color("reset"));
+        } else {
+            print($colors{"warning_head_color"}, "$field2", color("reset"));
+        }
+        print $field3, $field4;
+        if ($error_type) {
+            print($colors{"error_message_color"}, "$field5", color("reset"));
+        } else {
+            print($colors{"warning_message_color"}, "$field5", color("reset"));
+        }
+        if ($error_type) {
+            print($colors{"error_fname_color"}, "$field6", color("reset"));
+        } else {
+            print($colors{"warning_fname_color"}, "$field6", color("reset"));
+        }
+        print $field7;
+        if ($error_type) {
+            print($colors{"error_line_num_color"}, "$field8", color("reset"));
+        } else {
+            print($colors{"warning_line_num_color"}, "$field8", color("reset"));
+        }
+        print $field9, "\n";
         1;
     } elsif (/^(\*\*\s+)
               (at\s+)
@@ -282,7 +305,7 @@ sub vlog_scan {
         my $field7   = $7 || "";
         my $field8   = $8 || "";
         print $field1;
-        print($colors{"error_head_color"}, "$field2", color("reset"));
+        print($colors{"error_message_color"}, "$field2", color("reset"));
         print($colors{"error_fname_color"}, "$field3", color("reset"));
         print $field4;
         print($colors{"error_line_num_color"}, "$field5", color("reset"));
