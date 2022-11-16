@@ -36,7 +36,9 @@ sub init_defaults
     $nocolor{"dumb"} = "true";
 
     $colors{"note_head_color"}        = color("blue");
-    $colors{"note_message_color"}     = color("blue");
+    $colors{"note_fname_color"}       = color("cyan");
+    $colors{"note_line_num_color"}    = color("cyan");
+    $colors{"note_message_color"}     = color("clear");
 
     $colors{"warning_head_color"}     = color("yellow");
     $colors{"warning_fname_color"}    = color("cyan");
@@ -165,7 +167,7 @@ if ($cmd_pid) {
 sub vlog_scan {
     if (/^(\*\*\s+)
          # Title
-         (Error|Warning)
+         (Error|Warning|Note)
          (\s+\([^)]+\))?
          (:\s+)
          (\([^)]+\)\s+)?
@@ -196,27 +198,36 @@ sub vlog_scan {
         my $field11  = $11 || "";
         my $field12  = $12 || "";
         my $error_type = $field2 eq "Error";
+        my $note_type = $field2 eq "Note";
 
         print $field1;
-        if ($error_type) {
+        if ($note_type) {
+            print($colors{"note_head_color"}, "$field2", color("reset"));
+        } elsif ($error_type) {
             print($colors{"error_head_color"}, "$field2", color("reset"));
         } else {
             print($colors{"warning_head_color"}, "$field2", color("reset"));
         }
         print $field3, $field4, $field5;
-        if ($error_type) {
+        if ($note_type) {
+            print($colors{"note_fname_color"}, "$field6", color("reset"));
+        } elsif ($error_type) {
             print($colors{"error_fname_color"}, "$field6", color("reset"));
         } else {
             print($colors{"warning_fname_color"}, "$field6", color("reset"));
         }
         print $field7;
-        if ($error_type) {
+        if ($note_type) {
+            print($colors{"note_line_num_color"}, "$field8", color("reset"));
+        } elsif ($error_type) {
             print($colors{"error_line_num_color"}, "$field8", color("reset"));
         } else {
             print($colors{"warning_line_num_color"}, "$field8", color("reset"));
         }
         print $field9, $field10, $field11;
-        if ($error_type) {
+        if ($note_type) {
+            print($colors{"note_message_color"}, "$field12\n", color("reset"));
+        } elsif ($error_type) {
             print($colors{"error_message_color"}, "$field12\n", color("reset"));
         } else {
             print($colors{"warning_message_color"}, "$field12\n", color("reset"));
