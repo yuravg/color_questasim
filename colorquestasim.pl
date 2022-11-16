@@ -29,7 +29,7 @@ use Term::ANSIColor 'color';
 use feature 'state';
 
 
-my(%nocolor, %colors, %cmdPaths, %vsim_cfg);
+my(%nocolor, %colors, %cmd_paths, %vsim_cfg);
 
 sub init_defaults
 {
@@ -56,8 +56,7 @@ sub init_defaults
 sub load_configuration
 {
     my $file_name = shift;
-    my $fh;
-    open($fh, "<", $file_name) or return;
+    open(my $fh, "<", $file_name) or return;
 
     while (<$fh>) {
         next if (m/^\#.*/);         # It's a comment.
@@ -74,8 +73,10 @@ sub load_configuration
             }
         } elsif (defined $colors{$option}) {
             $colors{$option} = color($value);
+        } elsif (defined $vsim_cfg{$option}) {
+            $vsim_cfg{$option} = "$value";
         } else {
-            $cmdPaths{$option} = $value;
+            $cmd_paths{$option} = $value;
         }
     }
     close($fh);
@@ -129,7 +130,7 @@ if (-f $config_file_os) {
     load_configuration($config_file_os);
 }
 
-my $cmd = $cmdPaths{$prog_name} || find_path($prog_name);
+my $cmd = $cmd_paths{$prog_name} || find_path($prog_name);
 
 my $terminal = $ENV{"TERM"} || "dumb";
 
