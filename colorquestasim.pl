@@ -367,6 +367,23 @@ sub vopt_scan {
         print($colors{"error_head_color"}, "$field2", color("reset"));
         print $field3, $field4, $field5, $field6, "\n";
         1;
+    } elsif (/^(\*\*\s+)
+              # Title
+              (Note)
+              (:)
+              (.*)$/x) {
+        # 'vopt' message
+        # "** Note: Message"
+        my $field1   = $1 || "";
+        my $field2   = $2 || "";
+        my $field3   = $3 || "";
+        my $field4   = $4 || "";
+        print $field1;
+        print($colors{"note_head_color"}, "$field2", color("reset"));
+        print $field3;
+        print($colors{"note_message_color"}, "$field4", color("reset"));
+        print "\n";
+        1;
     } elsif (/^(No such file or directory.*)$/) {
         print($colors{"error_head_color"}, $1, color("reset"), "\n");
         1;
