@@ -181,9 +181,9 @@ sub vlog_scan {
          # Message
          (.*)$/x) {
         # 'vlog' messages:
-        # "** Error: (vlog-Num) file_name.sv(LineNum): Message."
-        # "** Error: file_name.sv(LineNum): (vlog-Num) Message."
-        # "** Error (Note): file-name.sv(LineNum): (vlog-Num) Message."
+        # "** Error: (vlog-Num) FileName(LineNum): Message."
+        # "** Error: FileName(LineNum): (vlog-Num) Message."
+        # "** Error (Note): FileName(LineNum): (vlog-Num) Message."
         my $field1   = $1 || "";
         my $field2   = $2 || "";
         my $field3   = $3 || "";
@@ -245,10 +245,10 @@ sub vlog_scan {
               (\s*)
               $/x) {
         # 'vlog' messages:
-        # "** Error: (vlog-Num) ** while parsing file included at file_name.sv(LineNum)"
-        # "** Error (suppressible): ** while parsing file included at file_name.sv(LineNum)"
-        # "** Error: ** while parsing file included at file_name.sv(LineNum)"
-        # "** Warning: ** while parsing file included at file_name.sv(LineNum)"
+        # "** Error: (vlog-Num) ** while parsing file included at FileName(LineNum)"
+        # "** Error (suppressible): ** while parsing file included at FileName(LineNum)"
+        # "** Error: ** while parsing file included at FileName(LineNum)"
+        # "** Warning: ** while parsing file included at FileName(LineNum)"
         my $field1   = $1 || "";
         my $field2   = $2 || "";
         my $field3   = $3 || "";
@@ -295,7 +295,7 @@ sub vlog_scan {
               (.*)
               $/x) {
         # 'vlog' message:
-        # "** at file_name.sv(LineNum): Message.
+        # "** at FileName(LineNum): Message.
         my $field1   = $1 || "";
         my $field2   = $2 || "";
         my $field3   = $3 || "";
