@@ -477,6 +477,13 @@ sub vsim_scan {
         }
         print "\n";
         1;
+    } elsif (/^(#\s+)(Error loading design)$/) {
+        my $field1    = $1 || "";
+        my $field2    = $2 || "";
+        print $field1;
+        print($colors{"error_head_color"}, "$field2", color("reset"));
+        print "\n";
+        1;
     } else {
         0;                      # no matches found
     }
