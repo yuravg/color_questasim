@@ -396,32 +396,70 @@ sub vopt_scan {
 }
 
 sub vsim_scan {
-    state $copyrigth_msg = 1;
+    state $copyright_scan = $vsim_cfg{"show_copyright"} ne "true";
 
-    if ($copyrigth_msg) {
-        if (/^#\s+run\s+/) {
-            $copyrigth_msg = 0;
-            if ($vsim_cfg{"show_copyright"} eq "true" ||
-                $vsim_cfg{"show_run_length"} eq "true") {
-                print;
-            }
-            1;
-        } else {
-            if ($vsim_cfg{"show_copyright"} eq "true") {
-                print;
-                1;
-            } else {
-                if ($vsim_cfg{"show_cmd_echo"} eq "true" && /^#\s+vsim\s+.*$/) {
-                    print;
-                }
-                1;              # hide copyright message
-            }
+    if ($copyright_scan) {
+        if (/^\#\s+vsim\s+.*$/ &&
+            $vsim_cfg{"show_cmd_echo"} eq "true") {
+            print;
         }
+        # Wait start of copyright message: '# // ', then wait its end
+        state $copyrigth_detect = 0;
+        if (/^#\s+\/\/\s+$/) {
+            $copyrigth_detect = 1;
+        }
+        if ($copyrigth_detect && not /^#\s+\/\//) {
+            $copyright_scan = 0;
+        }
+        $copyright_scan;        # enable next scan if detected end of copyright message
     } elsif (/^(\#\s+\*\*\s+)
-              # Title
-              (Fatal:|Error:|Warning:|Note:|Info:)
-              # Message
-              (.*)/x) {
+         # Title
+         (Error)
+         (\s+\([^)]+\))?
+         (:\s+)
+         (\([^)]+\)\s+)?
+         # File name
+         ([A-z0-9._\/-]+)
+         # Line number and round brackets
+         (\()([0-9]+)(\))
+         (:)
+         # vlog Num
+         (\s+\([^)]+\))?
+         # Message
+         (.*)$/x) {
+        # 'vsim' messages:
+        # "** Error: (vlog-Num) FileName(LineNum): Message."
+        # "** Error: FileName(LineNum): (vlog-Num) Message."
+        # "** Error (Note): FileName(LineNum): (vlog-Num) Message."
+        my $field1   = $1 || "";
+        my $field2   = $2 || "";
+        my $field3   = $3 || "";
+        my $field4   = $4 || "";
+        my $field5   = $5 || "";
+        my $field6   = $6 || "";
+        my $field7   = $7 || "";
+        my $field8   = $8 || "";
+        my $field9   = $9 || "";
+        my $field10  = $10 || "";
+        my $field11  = $11 || "";
+        my $field12  = $12 || "";
+
+        print $field1;
+        print($colors{"error_head_color"}, "$field2", color("reset"));
+        print $field3, $field4, $field5;
+        print($colors{"error_fname_color"}, "$field6", color("reset"));
+        print $field7;
+        print($colors{"error_line_num_color"}, "$field8", color("reset"));
+        print $field9, $field10, $field11;
+        print($colors{"error_message_color"}, "$field12\n", color("reset"));
+        1;
+    } elsif (/^(\#\s+\*\*\s+)
+         # Title
+         (Fatal:|Error:|Warning:|Note:|Info:)
+         # Message
+         (.*)/x) {
+        # 'vsim' messages:
+        # "# ** Error: Message"
         my $field1   = $1 || "";
         my $field2   = $2 || "";
         my $field3   = $3 || "";
