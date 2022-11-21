@@ -413,20 +413,20 @@ sub vsim_scan {
         }
         $copyright_scan;        # enable next scan if detected end of copyright message
     } elsif (/^(\#\s+\*\*\s+)
-         # Title
-         (Error)
-         (\s+\([^)]+\))?
-         (:\s+)
-         (\([^)]+\)\s+)?
-         # File name
-         ([A-z0-9._\/-]+)
-         # Line number and round brackets
-         (\()([0-9]+)(\))
-         (:)
-         # vlog Num
-         (\s+\([^)]+\))?
-         # Message
-         (.*)$/x) {
+              # Title
+              (Error)
+              (\s+\([^)]+\))?
+              (:\s+)
+              (\([^)]+\)\s+)?
+              # File name
+              ([A-z0-9._\/-]+)
+              # Line number and round brackets
+              (\()([0-9]+)(\))
+              (:)
+              # vlog Num
+              (\s+\([^)]+\))?
+              # Message
+              (.*)$/x) {
         # 'vsim' messages:
         # "** Error: (vlog-Num) FileName(LineNum): Message."
         # "** Error: FileName(LineNum): (vlog-Num) Message."
@@ -454,10 +454,10 @@ sub vsim_scan {
         print($colors{"error_message_color"}, "$field12\n", color("reset"));
         1;
     } elsif (/^(\#\s+\*\*\s+)
-         # Title
-         (Fatal:|Error:|Warning:|Note:|Info:)
-         # Message
-         (.*)/x) {
+              # Title
+              (Fatal:|Error:|Warning:|Note:|Info:)
+              # Message
+              (.*)/x) {
         # 'vsim' messages:
         # "# ** Error: Message"
         my $field1   = $1 || "";
