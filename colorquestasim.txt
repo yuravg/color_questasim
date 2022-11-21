@@ -46,6 +46,5 @@ warning_line_num_color: blue
 warning_message_color: cyan
 
 # vsim parser configuration
-show_copyright: no
-show_cmd_echo: true
-show_run_length: true
+show_vsim_copyright: no
+show_vsim_start_cmd: true

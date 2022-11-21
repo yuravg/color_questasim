@@ -50,9 +50,8 @@ sub init_defaults
     $colors{"error_line_num_color"}   = color("cyan");
     $colors{"error_message_color"}    = color("cyan");
 
-    $vsim_cfg{"show_copyright"} = "true";
-    $vsim_cfg{"show_cmd_echo"} = "true";
-    $vsim_cfg{"show_run_length"} = "true";
+    $vsim_cfg{"show_vsim_copyright"} = "true";
+    $vsim_cfg{"show_vsim_start_cmd"} = "true";
 }
 
 sub load_configuration
@@ -396,11 +395,11 @@ sub vopt_scan {
 }
 
 sub vsim_scan {
-    state $copyright_scan = $vsim_cfg{"show_copyright"} ne "true";
+    state $copyright_scan = $vsim_cfg{"show_vsim_copyright"} ne "true";
 
     if ($copyright_scan) {
         if (/^\#\s+vsim\s+.*$/ &&
-            $vsim_cfg{"show_cmd_echo"} eq "true") {
+            $vsim_cfg{"show_vsim_start_cmd"} eq "true") {
             print;
         }
         # Wait start of copyright message: '# // ', then wait its end
