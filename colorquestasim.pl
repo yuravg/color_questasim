@@ -52,6 +52,7 @@ sub init_defaults
 
     $vsim_cfg{"show_vsim_copyright"} = "true";
     $vsim_cfg{"show_vsim_start_cmd"} = "true";
+    $vsim_cfg{"show_vsim_start_time"} = "true";
 }
 
 sub load_configuration
@@ -400,6 +401,10 @@ sub vsim_scan {
     if ($copyright_scan) {
         if (/^\#\s+vsim\s+.*$/ &&
             $vsim_cfg{"show_vsim_start_cmd"} eq "true") {
+            print;
+        }
+        if (/^\#\s+Start\s+.*$/ &&
+            $vsim_cfg{"show_vsim_start_time"} eq "true") {
             print;
         }
         # Wait start of copyright message: '# // ', then wait its end

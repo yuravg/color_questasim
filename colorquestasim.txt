@@ -48,3 +48,4 @@ warning_message_color: cyan
 # vsim parser configuration
 show_vsim_copyright: no
 show_vsim_start_cmd: true
+show_vsim_start_time: true
