@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.0.0
+# Version: 1.0.1
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -397,6 +397,21 @@ sub vopt_scan {
 
 sub vsim_scan {
     state $copyright_scan = $vsim_cfg{"show_vsim_copyright"} ne "true";
+    state $copyrigth_detect = 0;
+
+    if ($copyright_scan) {
+        # Abort scanning of the copyright message and enable next scan
+        # Error message *without* show copyright message
+        # 'vsim' message:
+        # "** Error Message.
+        if (/\#\s+\*\*\s+Error/) {
+            $copyright_scan = 0;
+        }
+        # End of copyright message
+        if ($copyrigth_detect && not /^#\s+\/\//) {
+            $copyright_scan = 0;
+        }
+    }
 
     if ($copyright_scan) {
         if (/^\#\s+vsim\s+.*$/ &&
@@ -408,14 +423,10 @@ sub vsim_scan {
             print;
         }
         # Wait start of copyright message: '# // ', then wait its end
-        state $copyrigth_detect = 0;
         if (/^#\s+\/\/\s+$/) {
             $copyrigth_detect = 1;
         }
-        if ($copyrigth_detect && not /^#\s+\/\//) {
-            $copyright_scan = 0;
-        }
-        $copyright_scan;        # enable next scan if detected end of copyright message
+        1;
     } elsif (/^(\#\s+\*\*\s+)
               # Title
               (Error)
