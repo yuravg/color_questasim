@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.0.2
+# Version: 1.0.3
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -433,19 +433,22 @@ sub vsim_scan {
               (\s+\([^)]+\))?
               (:\s+)
               (\([^)]+\)\s+)?
-              # File name
-              ([A-z0-9._\/-]+)
-              # Line number and round brackets
-              (\()([0-9]+)(\))
-              (:)
+              (?:
+                  # File name
+                  ([A-z0-9._\/-]+)
+                  # Line number and round brackets
+                  (\()([0-9]+)(\))
+                  (:)
+              )?
               # vlog Num
               (\s+\([^)]+\))?
               # Message
               (.*)$/x) {
         # 'vsim' messages:
-        # "** Error: (vlog-Num) FileName(LineNum): Message."
+        # "** Error: (vsim-Num) FileName(LineNum): Message."
         # "** Error: FileName(LineNum): (vlog-Num) Message."
-        # "** Error (Note): FileName(LineNum): (vlog-Num) Message."
+        # "** Error (Note): FileName(LineNum): (vsim-Num) Message."
+        # "** Error (Note): (vsim-Num) Message"
         my $field1   = $1 || "";
         my $field2   = $2 || "";
         my $field3   = $3 || "";
@@ -530,7 +533,7 @@ sub vsim_scan {
         }
         print "\n";
         1;
-    } elsif (/^(#\s+)(Error loading design)$/) {
+    } elsif (/^(#\s+)?((?:Error loading design)|(?:Optimization failed))$/) {
         my $field1    = $1 || "";
         my $field2    = $2 || "";
         print $field1;
