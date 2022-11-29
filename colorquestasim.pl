@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.0.1
+# Version: 1.0.2
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -143,7 +143,7 @@ if ($nocolor{$terminal}) {
 }
 
 my $output;
-my $cmd_pid = open3('<&STDIN', $output, '>&STDERR', $cmd, @ARGV);
+my $cmd_pid = open3('<&STDIN', $output, $output, $cmd, @ARGV);
 
 while (<$output>) {
     if ($prog_name eq "vlog" && vlog_scan($_)) {
