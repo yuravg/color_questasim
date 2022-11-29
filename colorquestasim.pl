@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.0.3
+# Version: 1.0.4
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -182,8 +182,8 @@ sub vlog_scan {
          (.*)$/x) {
         # 'vlog' messages:
         # "** Error: (vlog-Num) FileName(LineNum): Message."
-        # "** Error: FileName(LineNum): (vlog-Num) Message."
         # "** Error (Note): FileName(LineNum): (vlog-Num) Message."
+        # "** Error: FileName(LineNum): (vlog-Num) Message."
         my $field1   = $1 || "";
         my $field2   = $2 || "";
         my $field3   = $3 || "";
@@ -348,13 +348,22 @@ sub vlog_scan {
 sub vopt_scan {
     if (/^(\*\*\s+)
          # Title
-         (Error)
-         (:)?
-         (\s+\([^)]+\))
-         (:)?
+         (Error|Warning)
+         (:\s+)
+         (?:
+             # File name
+             ([A-z0-9._\/-]+)
+             # Line number and round brackets
+             (\()([0-9]+)(\))
+             (:\s+)
+         )?
+         # vopt-Num
+         (\([^)]+\))?
+         # Message
          (.*)$/x) {
-        # 'vopt' message
-        # "** Error (Note): (vopt-Num) Message."
+        # 'vlog' messages:
+        # "** Error: FileName(LineNum): Message."
+        # "** Warning: FileName(LineNum): (vopt-Num) Message."
         # "** Error: (vopt-Num) Message."
         my $field1   = $1 || "";
         my $field2   = $2 || "";
@@ -362,10 +371,36 @@ sub vopt_scan {
         my $field4   = $4 || "";
         my $field5   = $5 || "";
         my $field6   = $6 || "";
+        my $field7   = $7 || "";
+        my $field8   = $8 || "";
+        my $field9   = $9 || "";
+        my $field10  = $10 || "";
+        my $error_type = $field2 eq "Error";
 
         print $field1;
-        print($colors{"error_head_color"}, "$field2", color("reset"));
-        print $field3, $field4, $field5, $field6, "\n";
+        if ($error_type) {
+            print($colors{"error_head_color"}, "$field2", color("reset"));
+        } else {
+            print($colors{"warning_head_color"}, "$field2", color("reset"));
+        }
+        print $field3;
+        if ($error_type) {
+            print($colors{"error_fname_color"}, "$field4", color("reset"));
+        } else {
+            print($colors{"warning_fname_color"}, "$field4", color("reset"));
+        }
+        print $field5;
+        if ($error_type) {
+            print($colors{"error_line_num_color"}, "$field6", color("reset"));
+        } else {
+            print($colors{"warning_line_num_color"}, "$field6", color("reset"));
+        }
+        print $field7, $field8, $field9;
+        if ($error_type) {
+            print($colors{"error_message_color"}, "$field10\n", color("reset"));
+        } else {
+            print($colors{"warning_message_color"}, "$field10\n", color("reset"));
+        }
         1;
     } elsif (/^(\*\*\s+)
               # Title
