@@ -4,7 +4,7 @@ A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
 
 # Install
 
-- Copy `colorquestasim.pl` in a directory of your choice.
+- Copy [colorquestasim.pl](colorquestasim.pl) in a directory of your choice.
 - Create symbol links pointing to `colorquestasim.pl`. This link must be named as the name of
   the QuestaSim command.  The directory where these links are created must be placed in `$PATH`
   **before** the directory where the QuestaSim commands lives.
