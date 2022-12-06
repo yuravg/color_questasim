@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.0.4
+# Version: 1.0.5
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -312,6 +312,18 @@ sub vlog_scan {
         print $field6, $field7;
         print($colors{"error_message_color"}, "$field8\n", color("reset"));
         1;
+    } elsif (/^(\*\*\s+)
+              (Fatal)
+              (:.*)
+             /x) {
+        # 'vlog' message:
+        # "** Fatal: Message"
+        my $field1   = $1 || "";
+        my $field2   = $2 || "";
+        my $field3   = $3 || "";
+        print $field1;
+        print($colors{"error_head_color"}, "${field2}${field3}", color("reset"));
+        print "\n";
     } elsif (/^(Errors:\s+)
               ([0-9]+)
               (,\s+)
