@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.0.5
+# Version: 1.0.6
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -236,7 +236,7 @@ sub vlog_scan {
               (Error|Warning)
               (:\s+|\s+\(suppressible\):\s+)
               (\([^)]+\)\s+)?
-              (\*\*\s+while\s+parsing\s+file\s+included\s+at\s+)
+              (\*\*\s+while\s+parsing\s+(?:(?:file\s+included\s+at\s+)|(?:macro\s+.*\s+)))
               # File name
               ([A-z0-9._\/-]+)
               # Line number and round brackets
@@ -249,6 +249,7 @@ sub vlog_scan {
         # "** Error (suppressible): ** while parsing file included at FileName(LineNum)"
         # "** Error: ** while parsing file included at FileName(LineNum)"
         # "** Warning: ** while parsing file included at FileName(LineNum)"
+        # "** Error: ** while parsing macro expansion: 'Name' starting at FileNmae(LineNum)"
         my $field1   = $1 || "";
         my $field2   = $2 || "";
         my $field3   = $3 || "";
