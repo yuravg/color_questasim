@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.0.7
+# Version: 1.0.8
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -325,33 +325,7 @@ sub vlog_scan {
         print $field1;
         print($colors{"error_head_color"}, "${field2}${field3}", color("reset"));
         print "\n";
-    } elsif (/^(Errors:\s+)
-              ([0-9]+)
-              (,\s+)
-              (Warnings:\s+)
-              ([0-9]+)
-              # Only for MinGW:
-              (\s*)
-              $/x) {
-        # 'vlog' messages:
-        # "Errors: Num, Warnings: Num"
-        my $field1    = $1 || "";
-        my $error_num = int($2) || 0;
-        my $field3    = $3 || "";
-        my $field4    = $4 || "";
-        my $warning_num  = int($5) || 0;
-        if ($error_num > 0) {
-            print($colors{"error_head_color"}, "${field1}$error_num", color("reset"));
-        } else {
-            print $field1, $error_num;
-        }
-        print $field3;
-        if ($warning_num > 0) {
-            print($colors{"warning_head_color"}, "${field4}$warning_num", color("reset"));
-        } else {
-            print $field4, $warning_num;
-        }
-        print "\n";
+    } elsif (error_summary_parser($_)) {
         1;
     } else {
         0;                      # no matches found
@@ -438,6 +412,8 @@ sub vopt_scan {
         1;
     } elsif (/^(Optimization failed*)$/) {
         print($colors{"error_head_color"}, $1, color("reset"), "\n");
+        1;
+    } elsif (error_summary_parser($_)) {
         1;
     } else {
         0;                      # no matches found
@@ -591,5 +567,37 @@ sub vsim_scan {
         1;
     } else {
         0;                      # no matches found
+    }
+}
+
+sub error_summary_parser {
+    if (/^(Errors:\s+)
+         ([0-9]+)
+         (,\s+)
+         (Warnings:\s+)
+         ([0-9]+)
+         # Only for MinGW:
+         (\s*)
+         $/x) {
+        # 'vlog' messages:
+        # "Errors: Num, Warnings: Num"
+        my $field1    = $1 || "";
+        my $error_num = int($2) || 0;
+        my $field3    = $3 || "";
+        my $field4    = $4 || "";
+        my $warning_num  = int($5) || 0;
+        if ($error_num > 0) {
+            print($colors{"error_head_color"}, "${field1}$error_num", color("reset"));
+        } else {
+            print $field1, $error_num;
+        }
+        print $field3;
+        if ($warning_num > 0) {
+            print($colors{"warning_head_color"}, "${field4}$warning_num", color("reset"));
+        } else {
+            print $field4, $warning_num;
+        }
+        print "\n";
+        1;
     }
 }
