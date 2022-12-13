@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.0.9
+# Version: 1.0.10
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -582,12 +582,19 @@ sub vsim_scan {
         }
         print "\n";
         1;
-    } elsif (/^(#\s+)?((?:Error loading design)|(?:Optimization failed))$/) {
+    } elsif (/^([#]\s+)?
+              (
+                  (?:Error\s+loading\s+design)|
+                  (?:Optimization\s+failed)|
+                  (?:No\s+such\s+file\s+or\s+directory)
+              )
+              (.*)/x) {
         my $field1    = $1 || "";
         my $field2    = $2 || "";
+        my $field3    = $3 || "";
         print $field1;
         print($colors{"error_head_color"}, "$field2", color("reset"));
-        print "\n";
+        print $field3, "\n";
         1;
     } else {
         0;                      # no matches found
