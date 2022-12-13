@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.0.6
+# Version: 1.0.7
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -362,7 +362,7 @@ sub vopt_scan {
     if (/^(\*\*\s+)
          # Title
          (Error|Warning)
-         (:\s+)
+         (:\s+|\s+\(suppressible\):\s+)
          (?:
              # File name
              ([A-z0-9._\/-]+)
@@ -378,6 +378,7 @@ sub vopt_scan {
         # "** Error: FileName(LineNum): Message."
         # "** Warning: FileName(LineNum): (vopt-Num) Message."
         # "** Error: (vopt-Num) Message."
+        # "** Error (suppressible): FileName(LineNum): (vopt-Num) Message."
         my $field1   = $1 || "";
         my $field2   = $2 || "";
         my $field3   = $3 || "";
