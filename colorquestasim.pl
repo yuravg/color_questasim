@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.0.8
+# Version: 1.0.9
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -249,7 +249,7 @@ sub vlog_scan {
         # "** Error (suppressible): ** while parsing file included at FileName(LineNum)"
         # "** Error: ** while parsing file included at FileName(LineNum)"
         # "** Warning: ** while parsing file included at FileName(LineNum)"
-        # "** Error: ** while parsing macro expansion: 'Name' starting at FileNmae(LineNum)"
+        # "** Error: ** while parsing macro expansion: 'Name' starting at FileName(LineNum)"
         my $field1   = $1 || "";
         my $field2   = $2 || "";
         my $field3   = $3 || "";
@@ -284,6 +284,30 @@ sub vlog_scan {
             print($colors{"warning_line_num_color"}, "$field8", color("reset"));
         }
         print $field9, "\n";
+        1;
+    } elsif (/^(\*\*\s+)
+              # Title
+              (Error)
+              # Note
+              (\s+\([^)]+\))
+              (:\s+)
+              # vlog Num
+              (\([^)]+\))
+              # Message
+              (.*)$/x) {
+        # 'vlog' messages:
+        # "** Error (Note): (vlog-Num) Option Message" - NOTE: 'vlog' command argument error message
+        my $field1   = $1 || "";
+        my $field2   = $2 || "";
+        my $field3   = $3 || "";
+        my $field4   = $4 || "";
+        my $field5   = $5 || "";
+        my $field6   = $6 || "";
+        print $field1;
+        print($colors{"error_head_color"}, "$field2", color("reset"));
+        print $field3, $field4, $field5;
+        print($colors{"error_message_color"}, "$field6", color("reset"));
+        print "\n";
         1;
     } elsif (/^(\*\*\s+)
               (at\s+)
