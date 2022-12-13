@@ -15,8 +15,11 @@ vopt -quiet example_err_vopt-not-project -o example_err_opt_vopt
 title "example_err_vopt_lib.sv"
 vlog -lint -quiet example_err_vopt_lib.sv && vopt -quiet no_lib -o prj_opt
 
+title "example_err_vopt_if.sv"
+vlog -lint -quiet example_err_vopt_if.sv && vopt -quiet example_err_vopt_if -o example_err_opt
+
 title "example_warning.sv"
-vlog -lint -quiet example_warning.sv
+vlog -lint example_warning.sv
 
 title "example_pkg.sv"
 vlog -quiet example_pkg.sv
