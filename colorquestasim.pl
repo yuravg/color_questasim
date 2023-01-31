@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.0.10
+# Version: 1.0.11
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -349,6 +349,30 @@ sub vlog_scan {
         print $field1;
         print($colors{"error_head_color"}, "${field2}${field3}", color("reset"));
         print "\n";
+    } elsif (/^(\*\*\s+)
+              (Error)
+              (:\s+)
+              # vlog Num
+              (\([^)]+\)\s+)?
+              (.*)
+             /x) {
+        # 'vlog' message:
+        # "** Error: (vlog-Num) Failed to open design unit file "FileName" in read mode."
+        my $field1   = $1 || "";
+        my $field2   = $2 || "";
+        my $field3   = $3 || "";
+        my $field4   = $4 || "";
+        my $field5   = $5 || "";
+        print $field1;
+        print($colors{"error_head_color"}, "$field2", color("reset"));
+        print $field3, $field4;
+        print($colors{"error_message_color"}, "$field5\n", color("reset"));
+    } elsif (/^(No\s+such\s+file\s+or\s+directory.*)
+             /x) {
+        # 'vlog' message:
+        # No such file or directory. (errno = ENOENT)
+        my $field1   = $1 || "";
+        print($colors{"error_message_color"}, "$field1\n", color("reset"));
     } elsif (error_summary_parser($_)) {
         1;
     } else {
