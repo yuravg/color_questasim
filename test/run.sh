@@ -6,6 +6,9 @@ title() {
 }
 
 
+title "missing_file.sv"
+vlog -lint -quiet example_missing_file.sv
+
 title "example_err_vopt.sv"
 vlog -lint -quiet example_err_vopt.sv && vopt -quiet example_err_vopt -o example_err_opt_vopt
 
