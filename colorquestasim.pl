@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.0.11
+# Version: 1.0.12
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -295,7 +295,7 @@ sub vlog_scan {
               (\([^)]+\))
               # Message
               (.*)$/x) {
-        # 'vlog' messages:
+        # 'vlog' message:
         # "** Error (Note): (vlog-Num) Option Message" - NOTE: 'vlog' command argument error message
         my $field1   = $1 || "";
         my $field2   = $2 || "";
@@ -349,6 +349,7 @@ sub vlog_scan {
         print $field1;
         print($colors{"error_head_color"}, "${field2}${field3}", color("reset"));
         print "\n";
+        1;
     } elsif (/^(\*\*\s+)
               (Error)
               (:\s+)
@@ -367,12 +368,14 @@ sub vlog_scan {
         print($colors{"error_head_color"}, "$field2", color("reset"));
         print $field3, $field4;
         print($colors{"error_message_color"}, "$field5\n", color("reset"));
+        1;
     } elsif (/^(No\s+such\s+file\s+or\s+directory.*)
              /x) {
         # 'vlog' message:
         # No such file or directory. (errno = ENOENT)
         my $field1   = $1 || "";
         print($colors{"error_message_color"}, "$field1\n", color("reset"));
+        1;
     } elsif (error_summary_parser($_)) {
         1;
     } else {
@@ -443,7 +446,7 @@ sub vopt_scan {
               (Note)
               (:)
               (.*)$/x) {
-        # 'vopt' message
+        # 'vopt' message:
         # "** Note: Message"
         my $field1   = $1 || "";
         my $field2   = $2 || "";
@@ -549,7 +552,7 @@ sub vsim_scan {
               (Fatal:|Error:|Warning:|Note:|Info:)
               # Message
               (.*)/x) {
-        # 'vsim' messages:
+        # 'vsim' message:
         # "# ** Error: Message"
         my $field1   = $1 || "";
         my $field2   = $2 || "";
@@ -583,7 +586,7 @@ sub vsim_scan {
               # Only for MinGW:
               (\s*)
               $/x) {
-        # 'vsim' messages:
+        # 'vsim' message:
         # "# Errors: Num, Warnings: Num"
         my $field1    = $1 || "";
         my $field2    = $2 || "";
@@ -634,7 +637,7 @@ sub error_summary_parser {
          # Only for MinGW:
          (\s*)
          $/x) {
-        # 'vlog' messages:
+        # 'vlog' message:
         # "Errors: Num, Warnings: Num"
         my $field1    = $1 || "";
         my $error_num = int($2) || 0;
