@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.0.14
+# Version: 1.1.0
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -29,7 +29,7 @@ use Term::ANSIColor 'color';
 use feature 'state';
 
 
-my(%nocolor, %colors, %cmd_paths, %vsim_cfg);
+my(%nocolor, %colors, %cmd_paths, %vsim_cfg, %highlight, @vsim_hi_patterns);
 
 sub init_defaults
 {
@@ -53,6 +53,8 @@ sub init_defaults
     $vsim_cfg{"show_vsim_copyright"} = "true";
     $vsim_cfg{"show_vsim_start_cmd"} = "true";
     $vsim_cfg{"show_vsim_start_time"} = "true";
+
+    $highlight{"vsim_hi_patterns_en"} = "no";
 }
 
 sub load_configuration
@@ -61,11 +63,15 @@ sub load_configuration
     open(my $fh, "<", $file_name) or return;
 
     while (<$fh>) {
-        next if (m/^\#.*/);         # It's a comment.
-        next if (!m/(.*):\s*(.*)/); # It's not of the form "foo: bar".
+        next if (m/^\#.*/);     # It's a comment.
+        # It is not one of the forms:
+        # <option_name> : <value>
+        # <option_name> : <value1> : <value2>
+        next if (!m/(^[^:]+)\s*:\s*([^:\n]+)(:\s*(.*))?\s*\n/);
 
         my $option = $1;
         my $value = $2;
+        my $mask = $4 || "";
 
         if ($option eq "nocolor") {
             # The nocolor option lists terminal types, separated by
@@ -77,6 +83,12 @@ sub load_configuration
             $colors{$option} = color($value);
         } elsif (defined $vsim_cfg{$option}) {
             $vsim_cfg{$option} = "$value";
+        } elsif (defined $highlight{$option}) {
+            $highlight{$option} = "$value";
+        } elsif ($option eq "vsim_hi_patterns"
+                 && $value ne ""
+                 && $mask ne "") {
+            push(@vsim_hi_patterns, $mask, $value);
         } else {
             $cmd_paths{$option} = $value;
         }
@@ -628,6 +640,19 @@ sub vsim_scan {
         print($colors{"error_head_color"}, "$field2", color("reset"));
         print $field3, "\n";
         1;
+    } elsif (@vsim_hi_patterns &&
+             $highlight{"vsim_hi_patterns_en"} eq "true") {
+        my $str = $_;
+        my $match = 0;
+        my @patterns = @vsim_hi_patterns;
+        while (my ($mask, $color) = splice(@patterns, 0, 2)) {
+            if ($str =~ /$mask/) {
+                chomp($str);    # remove newline to prevent overlay color
+                print(color($color), $str, color("reset"), "\n");
+                $match = 1;
+            }
+        }
+        $match;
     } else {
         0;                      # no matches found
     }

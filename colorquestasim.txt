@@ -5,6 +5,10 @@
 # <os_type> you can find out by running the command: perl -e 'print "$^O\n"'
 #
 #
+# Templates should be used to set parameters:
+# <option_name> : <value>
+# <option_name> : <value1> : <value2>
+#
 # The following groups of attributes may be combined for a given color:
 #
 # clear         black      on_black
@@ -49,3 +53,9 @@ warning_message_color: cyan
 show_vsim_copyright: no
 show_vsim_start_cmd: true
 show_vsim_start_time: true
+
+# Highlight patterns
+vsim_hi_patterns_en: yes
+# <option_name>: <color> : <regular-expressions>
+vsim_hi_patterns: underline    : ^# UVM_INFO @ 0: reporter \[RNTST\] Running test
+vsim_hi_patterns: black on_red : ^# (UVM_ERROR|UVM_FATAL)\s+[^:]
