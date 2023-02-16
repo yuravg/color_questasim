@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.0.13
+# Version: 1.0.14
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -466,7 +466,7 @@ sub vopt_scan {
         # For instance 'InstanceName' at path 'FullPath.InstanceName'
         print($colors{"warning_message_color"}, $1, color("reset"), "\n");
         1;
-    } elsif (/^(Optimization failed*)$/) {
+    } elsif (/^(Optimization failed.*)$/) {
         print($colors{"error_head_color"}, $1, color("reset"), "\n");
         1;
     } elsif (error_summary_parser($_)) {
