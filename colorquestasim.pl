@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.1.0
+# Version: 1.1.1
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -568,7 +568,7 @@ sub vsim_scan {
               # Title
               (Fatal:|Error:|Warning:|Note:|Info:)
               # Message
-              (.*)/x) {
+              (.*)[^\n]/x) {
         # 'vsim' message:
         # "# ** Error: Message"
         my $field1   = $1 || "";
