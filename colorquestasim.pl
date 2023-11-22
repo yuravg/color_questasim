@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.1.1
+# Version: 1.1.2
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -498,6 +498,10 @@ sub vsim_scan {
         # 'vsim' message:
         # "** Error Message.
         if (/\#\s+\*\*\s+Error/) {
+            $copyright_scan = 0;
+        }
+        # Run do file (run like: vsim -c -do run.do)
+        if (/^#\s+do\s+/) {
             $copyright_scan = 0;
         }
         # End of copyright message
