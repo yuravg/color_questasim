@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.1.4
+# Version: 1.1.5
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -642,7 +642,8 @@ sub vsim_scan {
                   (?:Optimization\s+failed)|
                   (?:No\s+such\s+file\s+or\s+directory)
               )
-              (.*)/x) {
+              (.*)
+              $/x) {
         my $field1    = $1 || "";
         my $field2    = $2 || "";
         my $field3    = $3 || "";
