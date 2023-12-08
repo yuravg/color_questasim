@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.1.5
+# Version: 1.1.6
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -33,8 +33,6 @@ my(%nocolor, %colors, %cmd_paths, %vsim_cfg, %highlight, @vsim_hi_patterns);
 
 sub init_defaults
 {
-    $nocolor{"dumb"} = "true";
-
     $colors{"note_head_color"}        = color("blue");
     $colors{"note_fname_color"}       = color("cyan");
     $colors{"note_line_num_color"}    = color("cyan");
