@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.1.6
+# Version: 1.1.7
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -51,6 +51,7 @@ sub init_defaults
     $vsim_cfg{"show_vsim_copyright"} = "true";
     $vsim_cfg{"show_vsim_start_cmd"} = "true";
     $vsim_cfg{"show_vsim_start_time"} = "true";
+    $vsim_cfg{"show_vsim_uvm_relnotes"} = "true";
 
     $highlight{"vsim_hi_patterns_en"} = "no";
 }
@@ -490,6 +491,9 @@ sub vsim_scan {
     state $copyright_scan = $vsim_cfg{"show_vsim_copyright"} ne "true";
     state $copyrigth_detect = 0;
     state $run_do_file = 0;
+    state $uvm_relnotes_scan = $vsim_cfg{"show_vsim_uvm_relnotes"} ne "true";
+    state $uvm_relnotes_detect = 0;
+    state $uvm_relnotes_msg_detect = 0;
 
     if ($copyright_scan) {
         # Abort scanning of the copyright message and enable next scan
@@ -506,6 +510,15 @@ sub vsim_scan {
         # End of copyright message
         if ($copyrigth_detect && not /^#\s+\/\//) {
             $copyright_scan = 0;
+        }
+    }
+
+    if ($uvm_relnotes_scan) {
+        # Begin of the UVM release notes
+        if (/\#\s+UVM_INFO\s+/) {
+            if (not $uvm_relnotes_detect) {
+                $uvm_relnotes_detect = 1;
+            }
         }
     }
 
@@ -526,6 +539,14 @@ sub vsim_scan {
             unless (/^#\s+\/\/\s+/) {
                 print;
             }
+        }
+        1;
+    } elsif ($uvm_relnotes_scan && $uvm_relnotes_detect) {
+        if (/RELEASE\s+NOTES/) {
+            $uvm_relnotes_msg_detect = 1;
+        } elsif ($uvm_relnotes_msg_detect && /\#\s+UVM_INFO\s+/) { # End of the UVM release notes
+            $uvm_relnotes_scan = 0;
+            print;
         }
         1;
     } elsif (/^(\#\s+\*\*\s+)
