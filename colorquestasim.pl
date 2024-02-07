@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.1.7
+# Version: 1.1.8
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -48,10 +48,11 @@ sub init_defaults
     $colors{"error_line_num_color"}   = color("cyan");
     $colors{"error_message_color"}    = color("cyan");
 
-    $vsim_cfg{"show_vsim_copyright"} = "true";
-    $vsim_cfg{"show_vsim_start_cmd"} = "true";
-    $vsim_cfg{"show_vsim_start_time"} = "true";
+    $vsim_cfg{"show_vsim_copyright"}    = "true";
+    $vsim_cfg{"show_vsim_start_cmd"}    = "true";
+    $vsim_cfg{"show_vsim_start_time"}   = "true";
     $vsim_cfg{"show_vsim_uvm_relnotes"} = "true";
+    $vsim_cfg{"show_vsim_loading_libs"} = "true";
 
     $highlight{"vsim_hi_patterns_en"} = "no";
 }
@@ -390,7 +391,7 @@ sub vlog_scan {
     } elsif (error_summary_parser($_)) {
         1;
     } else {
-        0;                      # no matches found
+        0;                      # no matches found. Should print current line without changes.
     }
 }
 
@@ -483,7 +484,7 @@ sub vopt_scan {
     } elsif (error_summary_parser($_)) {
         1;
     } else {
-        0;                      # no matches found
+        0;                      # no matches found. Should print current line without changes.
     }
 }
 
@@ -494,6 +495,7 @@ sub vsim_scan {
     state $uvm_relnotes_scan = $vsim_cfg{"show_vsim_uvm_relnotes"} ne "true";
     state $uvm_relnotes_detect = 0;
     state $uvm_relnotes_msg_detect = 0;
+    state $loading_scan = $vsim_cfg{"show_vsim_loading_libs"} ne "true";
 
     if ($copyright_scan) {
         # Abort scanning of the copyright message and enable next scan
@@ -519,6 +521,12 @@ sub vsim_scan {
             if (not $uvm_relnotes_detect) {
                 $uvm_relnotes_detect = 1;
             }
+        }
+    }
+
+    if ($loading_scan) {
+        if (/^#\s+run/ || /^#\s+\*\*\s+Error/) {
+            $loading_scan = 0;
         }
     }
 
@@ -549,6 +557,10 @@ sub vsim_scan {
             print;
         }
         1;
+    } elsif ($loading_scan) {
+        if (/^#\s+(Loading|Compiling)\s+/) {
+            1;
+        }
     } elsif (/^(\#\s+\*\*\s+)
               # Title
               (Error)
@@ -684,7 +696,7 @@ sub vsim_scan {
         }
         $match;
     } else {
-        0;                      # no matches found
+        0;                      # no matches found. Should print current line without changes.
     }
 }
 

@@ -54,6 +54,7 @@ show_vsim_copyright: no
 show_vsim_start_cmd: true
 show_vsim_start_time: true
 show_vsim_uvm_relnotes: no
+show_vsim_loading_libs: true
 
 # Highlight patterns
 vsim_hi_patterns_en: yes
