@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.1.8
+# Version: 1.1.9
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -57,6 +57,16 @@ sub init_defaults
     $highlight{"vsim_hi_patterns_en"} = "no";
 }
 
+sub get_logical_option
+{
+    return /true|yes/ ? "true" : "no";
+}
+
+sub vsim_option_is_true
+{
+    return ($vsim_cfg{$_[0]} =~ /true/) ? 1 : 0;
+}
+
 sub load_configuration
 {
     my $file_name = shift;
@@ -82,7 +92,7 @@ sub load_configuration
         } elsif (defined $colors{$option}) {
             $colors{$option} = color($value);
         } elsif (defined $vsim_cfg{$option}) {
-            $vsim_cfg{$option} = "$value";
+            $vsim_cfg{$option} = get_logical_option("$value");
         } elsif (defined $highlight{$option}) {
             $highlight{$option} = "$value";
         } elsif ($option eq "vsim_hi_patterns"
@@ -489,13 +499,13 @@ sub vopt_scan {
 }
 
 sub vsim_scan {
-    state $copyright_scan = $vsim_cfg{"show_vsim_copyright"} ne "true";
+    state $copyright_scan = not vsim_option_is_true("show_vsim_copyright");
     state $copyrigth_detect = 0;
     state $run_do_file = 0;
-    state $uvm_relnotes_scan = $vsim_cfg{"show_vsim_uvm_relnotes"} ne "true";
+    state $uvm_relnotes_scan = not vsim_option_is_true("show_vsim_uvm_relnotes");
     state $uvm_relnotes_detect = 0;
     state $uvm_relnotes_msg_detect = 0;
-    state $loading_scan = $vsim_cfg{"show_vsim_loading_libs"} ne "true";
+    state $loading_scan = not vsim_option_is_true("show_vsim_loading_libs");
 
     if ($copyright_scan) {
         # Abort scanning of the copyright message and enable next scan
@@ -531,12 +541,12 @@ sub vsim_scan {
     }
 
     if ($copyright_scan) {
-        if (/^\#\s+vsim\s+.*$/ &&
-            $vsim_cfg{"show_vsim_start_cmd"} eq "true") {
+        if (vsim_option_is_true("show_vsim_start_cmd") &&
+            /^\#\s+vsim\s+.*$/) {
             print;
         }
-        if (/^\#\s+Start\s+.*$/ &&
-            $vsim_cfg{"show_vsim_start_time"} eq "true") {
+        if (vsim_option_is_true("show_vsim_start_time") &&
+            /^\#\s+Start\s+.*$/) {
             print;
         }
         # Wait start of copyright message: '# // ', then wait its end

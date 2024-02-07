@@ -49,7 +49,7 @@ warning_fname_color: yellow
 warning_line_num_color: blue
 warning_message_color: cyan
 
-# vsim parser configuration
+# vsim parser configuration (usage: yes/true to enable or no/false to disable the option)
 show_vsim_copyright: no
 show_vsim_start_cmd: true
 show_vsim_start_time: true
