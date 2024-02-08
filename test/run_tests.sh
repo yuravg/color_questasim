@@ -8,3 +8,6 @@ echo "VOPT:"
 
 echo "VSIM:"
 ./test_vsim.sh
+
+echo "VSIM UVM:"
+./test_vsim_uvm.sh
