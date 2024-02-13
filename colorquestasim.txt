@@ -49,12 +49,14 @@ warning_fname_color: yellow
 warning_line_num_color: blue
 warning_message_color: cyan
 
-# vsim parser configuration (usage: yes/true to enable or no/false to disable the option)
+# Vsim parser configuration (usage: yes/true to enable or no/false to disable the option)
 show_vsim_copyright: no
 show_vsim_start_cmd: true
 show_vsim_start_time: true
-show_vsim_uvm_relnotes: no
 show_vsim_loading_libs: true
+# Vsim UVM
+show_vsim_uvm_relnotes: no
+show_questa_uvm_pkg_rpt: no
 
 # Highlight patterns
 vsim_hi_patterns_en: yes

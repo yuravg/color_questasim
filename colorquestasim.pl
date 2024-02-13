@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.1.9
+# Version: 1.2.0
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -51,8 +51,10 @@ sub init_defaults
     $vsim_cfg{"show_vsim_copyright"}    = "true";
     $vsim_cfg{"show_vsim_start_cmd"}    = "true";
     $vsim_cfg{"show_vsim_start_time"}   = "true";
-    $vsim_cfg{"show_vsim_uvm_relnotes"} = "true";
     $vsim_cfg{"show_vsim_loading_libs"} = "true";
+
+    $vsim_cfg{"show_vsim_uvm_relnotes"}  = "true";
+    $vsim_cfg{"show_questa_uvm_pkg_rpt"} = "true";
 
     $highlight{"vsim_hi_patterns_en"} = "no";
 }
@@ -168,9 +170,12 @@ my $output;
 my $cmd_pid = open3('<&STDIN', $output, $output, $cmd, @ARGV);
 
 while (<$output>) {
-    if ($prog_name eq "vlog" && vlog_scan($_)) {
-    } elsif ($prog_name eq "vopt" && vopt_scan($_)) {
-    } elsif ($prog_name eq "vsim" && vsim_scan($_)) {
+    if ($prog_name eq "vlog") {
+        vlog_scan($_);
+    } elsif ($prog_name eq "vopt") {
+        vopt_scan($_);
+    } elsif ($prog_name eq "vsim") {
+        vsim_scan($_);
     } else {
         print;
     }
@@ -253,7 +258,6 @@ sub vlog_scan {
         } else {
             print($colors{"warning_message_color"}, "$field12\n", color("reset"));
         }
-        1;
     } elsif (/^(\*\*\s+)
               (Error|Warning)
               (:\s+|\s+\(suppressible\):\s+)
@@ -306,7 +310,6 @@ sub vlog_scan {
             print($colors{"warning_line_num_color"}, "$field8", color("reset"));
         }
         print $field9, "\n";
-        1;
     } elsif (/^(\*\*\s+)
               # Title
               (Error)
@@ -330,7 +333,6 @@ sub vlog_scan {
         print $field3, $field4, $field5;
         print($colors{"error_message_color"}, "$field6", color("reset"));
         print "\n";
-        1;
     } elsif (/^(\*\*\s+)
               (at\s+)
               # File name
@@ -358,7 +360,6 @@ sub vlog_scan {
         print($colors{"error_line_num_color"}, "$field5", color("reset"));
         print $field6, $field7;
         print($colors{"error_message_color"}, "$field8\n", color("reset"));
-        1;
     } elsif (/^(\*\*\s+)
               (Fatal)
               (:.*)
@@ -371,7 +372,6 @@ sub vlog_scan {
         print $field1;
         print($colors{"error_head_color"}, "${field2}${field3}", color("reset"));
         print "\n";
-        1;
     } elsif (/^(\*\*\s+)
               (Error)
               (:\s+)
@@ -390,20 +390,17 @@ sub vlog_scan {
         print($colors{"error_head_color"}, "$field2", color("reset"));
         print $field3, $field4;
         print($colors{"error_message_color"}, "$field5\n", color("reset"));
-        1;
     } elsif (/^(No\s+such\s+file\s+or\s+directory.*)
              /x) {
         # 'vlog' message:
         # No such file or directory. (errno = ENOENT)
         my $field1   = $1 || "";
         print($colors{"error_message_color"}, "$field1\n", color("reset"));
-        1;
     } elsif (error_summary_parser($_)) {
-        1;
     } else {
-        0;                      # no matches found. Should print current line without changes.
+        print;                  # Nothing found. Print current line without changes.
     }
-}
+}                               # vlog_scan
 
 sub vopt_scan {
     if (/^(\*\*\s+)
@@ -462,7 +459,6 @@ sub vopt_scan {
         } else {
             print($colors{"warning_message_color"}, "$field10\n", color("reset"));
         }
-        1;
     } elsif (/^(\*\*\s+)
               # Title
               (Note)
@@ -479,34 +475,31 @@ sub vopt_scan {
         print $field3;
         print($colors{"note_message_color"}, "$field4", color("reset"));
         print "\n";
-        1;
     } elsif (/^(No such file or directory.*)$/) {
         print($colors{"error_head_color"}, $1, color("reset"), "\n");
-        1;
     } elsif (/^(\s+For instance.*)$/) {
         # 'vopt' message:
         # For instance 'InstanceName' at path 'FullPath.InstanceName'
         print($colors{"warning_message_color"}, $1, color("reset"), "\n");
-        1;
     } elsif (/^(Optimization failed.*)$/) {
         print($colors{"error_head_color"}, $1, color("reset"), "\n");
-        1;
     } elsif (error_summary_parser($_)) {
-        1;
     } else {
-        0;                      # no matches found. Should print current line without changes.
+        print;                  # Nothing found. Print current line without changes.
     }
-}
+}                               # vopt_scan
 
 sub vsim_scan {
     state $copyright_scan = not vsim_option_is_true("show_vsim_copyright");
-    state $copyrigth_detect = 0;
+    state $copyrigth_detected = 0;
     state $run_do_file = 0;
-    state $uvm_relnotes_scan = not vsim_option_is_true("show_vsim_uvm_relnotes");
-    state $uvm_relnotes_detect = 0;
-    state $uvm_relnotes_msg_detect = 0;
     state $loading_scan = not vsim_option_is_true("show_vsim_loading_libs");
+    state $uvm_relnotes_scan = not vsim_option_is_true("show_vsim_uvm_relnotes");
+    state $uvm_relnotes_detected = 0;
+    state $uvm_relnotes_msg_detected = 0;
+    state $questa_uvm_pkg_scan = not vsim_option_is_true("show_questa_uvm_pkg_rpt");
 
+    # Abort scanning of the Copyright message:
     if ($copyright_scan) {
         # Abort scanning of the copyright message and enable next scan
         # Error message *without* show copyright message
@@ -519,58 +512,140 @@ sub vsim_scan {
         if (/^#\s+do\s+/) {
             $run_do_file = 1;
         }
-        # End of copyright message
-        if ($copyrigth_detect && not /^#\s+\/\//) {
+        # End of the copyright message:
+        # Message without "# //"
+        if ($copyrigth_detected && not /^#\s+\/\//) {
             $copyright_scan = 0;
         }
     }
 
+    # Start/Abort scanner of the UVM release note
     if ($uvm_relnotes_scan) {
-        # Begin of the UVM release notes
+        # Start of the UVM release notes: '# UVM_INFO ...'
         if (/\#\s+UVM_INFO\s+/) {
-            if (not $uvm_relnotes_detect) {
-                $uvm_relnotes_detect = 1;
+            if ($uvm_relnotes_detected ||
+                /\#\s+UVM_INFO\s+verilog_src\/questa_uvm_pkg-/ ||
+                /\#\s+UVM_INFO\s+@\s+0:\s+reporter\s+\[RNTST\]\s+Running\s+test/) {
+                # Abort (after detected start or UVM package info if used +UVM_NO_RELNOTES)
+                # 'vsim' messages:
+                # UVM_INFO verilog_src/questa_uvm_pkg-...
+                # UVM_INFO @ 0: reporter [RNTST] Running test ...
+                $uvm_relnotes_scan = 0;
+            }
+            if (not $uvm_relnotes_detected) {
+                # Start
+                $uvm_relnotes_detected = 1;
             }
         }
     }
 
-    if ($loading_scan) {
-        if (/^#\s+run/ || /^#\s+\*\*\s+Error/) {
-            $loading_scan = 0;
-        }
+    # Abort scanning of UVM header messages
+    if ($questa_uvm_pkg_scan &&
+        # 'vsim' messages:
+        # UVM_INFO @ 0: reporter [RNTST] Running test my_test...
+        /\#\s+UVM_INFO\s+@\s+0:\s+reporter\s+\[RNTST\]\s+Running\s+test/) {
+        $questa_uvm_pkg_scan = 0;
     }
 
+    # Start of simulation
+    # 'vsim' messages:
+    # "# run -all"
+    if (/^#\s+run\s+/) {
+        $loading_scan = 0;
+        $copyright_scan = 0;
+        $run_do_file = 0;
+    }
+
+    # Start 'vsim' scanner:
     if ($copyright_scan) {
         if (vsim_option_is_true("show_vsim_start_cmd") &&
             /^\#\s+vsim\s+.*$/) {
+            # Show running vsim command message:
+            # "# vsim ...."
             print;
         }
         if (vsim_option_is_true("show_vsim_start_time") &&
-            /^\#\s+Start\s+.*$/) {
+            /^\#\s+Start\s+time:\s+.*$/) {
+            # Show start time message:
+            # Start time: ...
             print;
         }
         # Wait start of copyright message: '# // ', then wait its end
         if (/^#\s+\/\/\s+$/) {
-            $copyrigth_detect = 1;
+            # Hide the Copyright message
+            $copyrigth_detected = 1;
         } elsif ($run_do_file) {
-            # Hide copyright message
+            # Hide the Copyright message
             unless (/^#\s+\/\/\s+/) {
                 print;
             }
+        } elsif (/^(\#\s+\*\*\s+)
+                  # Title
+                  (Note|Warning)
+                  (:)
+                  (?:
+                      \s+
+                      # File name
+                      ([A-z0-9._\/-]+)
+                      # Line number and round brackets
+                      (\()([0-9]+)(\))
+                      (:)
+                  )?
+                  # vlog Num
+                  (\s+\([^)]+\))
+                  # Message
+                  (.*)$/x) {
+            # 'vsim' messages:
+            # "** Note: (vsim-or-vopt-Num) Message"
+            # "** Warning: FileName(LineNum): (vlog-Num) Message."
+            my $field1   = $1 || "";
+            my $field2   = $2 || "";
+            my $field3   = $3 || "";
+            my $field4   = $4 || "";
+            my $field5   = $5 || "";
+            my $field6   = $6 || "";
+            my $field7   = $7 || "";
+            my $field8   = $8 || "";
+            my $field9   = $9 || "";
+            my $field10  = $10 || "";
+            my $warning_type = $field2 eq "Warning";
+
+            if ($warning_type) {
+                print($colors{"warning_head_color"}, "$field2", color("reset"));
+            } else {
+                print($colors{"note_head_color"}, "$field2", color("reset"));
+            }
+            print $field3;
+            if ($warning_type) {
+                print($colors{"warning_fname_color"}, "$field4", color("reset"));
+            } else {
+                print($colors{"note_fname_color"}, "$field4", color("reset"));
+            }
+            print $field5;
+            if ($warning_type) {
+                print($colors{"warning_line_num_color"}, "$field6", color("reset"));
+            } else {
+                print($colors{"note_line_num_color"}, "$field6", color("reset"));
+            }
+            print $field7, $field8, $field9;
+            if ($warning_type) {
+                print($colors{"warning_message_color"}, "$field10", color("reset"));
+            } else {
+                print($colors{"note_message_color"}, "$field10", color("reset"));
+            }
+            print "\n";
         }
-        1;
-    } elsif ($uvm_relnotes_scan && $uvm_relnotes_detect) {
-        if (/RELEASE\s+NOTES/) {
-            $uvm_relnotes_msg_detect = 1;
-        } elsif ($uvm_relnotes_msg_detect && /\#\s+UVM_INFO\s+/) { # End of the UVM release notes
-            $uvm_relnotes_scan = 0;
-            print;
-        }
-        1;
-    } elsif ($loading_scan) {
-        if (/^#\s+(Loading|Compiling)\s+/) {
-            1;
-        }
+    } elsif ($loading_scan &&
+             /^#\s+(Loading|Compiling)\s+/) {
+        # 'vsim' messages:
+        # Loading ...
+        # Compiling ...
+    } elsif ($questa_uvm_pkg_scan &&
+             /\#\s+UVM_INFO\s+verilog_src\/questa_uvm_pkg-/) {
+        # 'vsim' messages:
+        # UVM_INFO verilog_src/questa_uvm_pkg-...
+    } elsif ($uvm_relnotes_scan && $uvm_relnotes_detected) {
+        # Skip UVM release notes message
     } elsif (/^(\#\s+\*\*\s+)
               # Title
               (Error)
@@ -614,7 +689,6 @@ sub vsim_scan {
         print($colors{"error_line_num_color"}, "$field8", color("reset"));
         print $field9, $field10, $field11;
         print($colors{"error_message_color"}, "$field12\n", color("reset"));
-        1;
     } elsif (/^(\#\s+\*\*\s+)
               # Title
               (Fatal:|Error:|Warning:|Note:|Info:)
@@ -644,7 +718,6 @@ sub vsim_scan {
             print($colors{"error_message_color"}, "$field3", color("reset"));
         }
         print "\n";
-        1;
     } elsif (/^(\#\s+)
               (Errors:\s+)
               ([0-9]+)
@@ -676,7 +749,6 @@ sub vsim_scan {
             print $field5, $warning_num;
         }
         print "\n";
-        1;
     } elsif (/^([#]\s+)?
               (
                   (?:Error\s+loading\s+design)|
@@ -691,24 +763,27 @@ sub vsim_scan {
         print $field1;
         print($colors{"error_head_color"}, "$field2", color("reset"));
         print $field3, "\n";
-        1;
-    } elsif (@vsim_hi_patterns &&
-             $highlight{"vsim_hi_patterns_en"} eq "true") {
-        my $str = $_;
-        my $match = 0;
-        my @patterns = @vsim_hi_patterns;
-        while (my ($mask, $color) = splice(@patterns, 0, 2)) {
-            if ($str =~ /$mask/) {
-                chomp($str);    # remove newline to prevent overlay color
-                print(color($color), $str, color("reset"), "\n");
-                $match = 1;
-            }
-        }
-        $match;
     } else {
-        0;                      # no matches found. Should print current line without changes.
-    }
-}
+        if (@vsim_hi_patterns &&
+            $highlight{"vsim_hi_patterns_en"} eq "true") {
+            my $str = $_;
+            my $match = 0;
+            my @patterns = @vsim_hi_patterns;
+            while (my ($mask, $color) = splice(@patterns, 0, 2)) {
+                if ($str =~ /$mask/) {
+                    chomp($str); # remove newline to prevent overlay color
+                    print(color($color), $str, color("reset"), "\n");
+                    $match = 1;
+                }
+            }
+            if (not $match) {
+                print;          # Nothing found. Print current line without changes.
+            }
+        } else {
+            print;              # Nothing found. Print current line without changes.
+        }
+    }                           # else
+}                               # vsim_scan
 
 sub error_summary_parser {
     if (/^(Errors:\s+)
@@ -738,6 +813,5 @@ sub error_summary_parser {
             print $field4, $warning_num;
         }
         print "\n";
-        1;
     }
-}
+} # error_summary_parser
