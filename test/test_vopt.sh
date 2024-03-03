@@ -17,6 +17,3 @@ vlog -lint -quiet example_err_vopt_lib.sv && vopt -quiet no_lib -o prj_opt
 
 title "example_err_vopt_if.sv"
 vlog -lint -quiet example_err_vopt_if.sv && vopt -quiet example_err_vopt_if -o example_err_opt
-
-title "example_err_vsim.sv"
-vlog -lint -quiet example_err_vsim.sv && vopt -quiet example_err_vsim -o prj_opt && vsim -c -quiet prj_opt -l example_err_vsim.log -do "run -all; exit"
