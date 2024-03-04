@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.2.0
+# Version: 1.2.1
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -228,36 +228,37 @@ sub vlog_scan {
 
         print $field1;
         if ($note_type) {
-            print($colors{"note_head_color"}, "$field2", color("reset"));
+            print_color("note_head_color", "$field2");
         } elsif ($error_type) {
-            print($colors{"error_head_color"}, "$field2", color("reset"));
+            print_color("error_head_color", "$field2");
         } else {
-            print($colors{"warning_head_color"}, "$field2", color("reset"));
+            print_color("warning_head_color", "$field2");
         }
         print $field3, $field4, $field5;
         if ($note_type) {
-            print($colors{"note_fname_color"}, "$field6", color("reset"));
+            print_color("note_fname_color", "$field6");
         } elsif ($error_type) {
-            print($colors{"error_fname_color"}, "$field6", color("reset"));
+            print_color("error_fname_color", "$field6");
         } else {
-            print($colors{"warning_fname_color"}, "$field6", color("reset"));
+            print_color("warning_fname_color", "$field6");
         }
         print $field7;
         if ($note_type) {
-            print($colors{"note_line_num_color"}, "$field8", color("reset"));
+            print_color("note_line_num_color", "$field8");
         } elsif ($error_type) {
-            print($colors{"error_line_num_color"}, "$field8", color("reset"));
+            print_color("error_line_num_color", "$field8");
         } else {
-            print($colors{"warning_line_num_color"}, "$field8", color("reset"));
+            print_color("warning_line_num_color", "$field8");
         }
         print $field9, $field10, $field11;
         if ($note_type) {
-            print($colors{"note_message_color"}, "$field12\n", color("reset"));
+            print_color("note_message_color", "$field12");
         } elsif ($error_type) {
-            print($colors{"error_message_color"}, "$field12\n", color("reset"));
+            print_color("error_message_color", "$field12");
         } else {
-            print($colors{"warning_message_color"}, "$field12\n", color("reset"));
+            print_color("warning_message_color", "$field12");
         }
+        print "\n";
     } elsif (/^(\*\*\s+)
               (Error|Warning)
               (:\s+|\s+\(suppressible\):\s+)
@@ -288,26 +289,26 @@ sub vlog_scan {
         my $error_type = $field2 eq "Error";
         print $field1;
         if ($error_type) {
-            print($colors{"error_head_color"}, "$field2", color("reset"));
+            print_color("error_head_color", "$field2");
         } else {
-            print($colors{"warning_head_color"}, "$field2", color("reset"));
+            print_color("warning_head_color", "$field2");
         }
         print $field3, $field4;
         if ($error_type) {
-            print($colors{"error_message_color"}, "$field5", color("reset"));
+            print_color("error_message_color", "$field5");
         } else {
-            print($colors{"warning_message_color"}, "$field5", color("reset"));
+            print_color("warning_message_color", "$field5");
         }
         if ($error_type) {
-            print($colors{"error_fname_color"}, "$field6", color("reset"));
+            print_color("error_fname_color", "$field6");
         } else {
-            print($colors{"warning_fname_color"}, "$field6", color("reset"));
+            print_color("warning_fname_color", "$field6");
         }
         print $field7;
         if ($error_type) {
-            print($colors{"error_line_num_color"}, "$field8", color("reset"));
+            print_color("error_line_num_color", "$field8");
         } else {
-            print($colors{"warning_line_num_color"}, "$field8", color("reset"));
+            print_color("warning_line_num_color", "$field8");
         }
         print $field9, "\n";
     } elsif (/^(\*\*\s+)
@@ -329,9 +330,9 @@ sub vlog_scan {
         my $field5   = $5 || "";
         my $field6   = $6 || "";
         print $field1;
-        print($colors{"error_head_color"}, "$field2", color("reset"));
+        print_color("error_head_color", "$field2");
         print $field3, $field4, $field5;
-        print($colors{"error_message_color"}, "$field6", color("reset"));
+        print_color("error_message_color", "$field6");
         print "\n";
     } elsif (/^(\*\*\s+)
               (at\s+)
@@ -354,12 +355,13 @@ sub vlog_scan {
         my $field7   = $7 || "";
         my $field8   = $8 || "";
         print $field1;
-        print($colors{"error_message_color"}, "$field2", color("reset"));
-        print($colors{"error_fname_color"}, "$field3", color("reset"));
+        print_color("error_message_color", "$field2");
+        print_color("error_fname_color", "$field3");
         print $field4;
-        print($colors{"error_line_num_color"}, "$field5", color("reset"));
+        print_color("error_line_num_color", "$field5");
         print $field6, $field7;
-        print($colors{"error_message_color"}, "$field8\n", color("reset"));
+        print_color("error_message_color", "$field8");
+        print "\n";
     } elsif (/^(\*\*\s+)
               (Fatal)
               (:.*)
@@ -370,7 +372,7 @@ sub vlog_scan {
         my $field2   = $2 || "";
         my $field3   = $3 || "";
         print $field1;
-        print($colors{"error_head_color"}, "${field2}${field3}", color("reset"));
+        print_color("error_head_color", "${field2}${field3}");
         print "\n";
     } elsif (/^(\*\*\s+)
               (Error)
@@ -387,15 +389,17 @@ sub vlog_scan {
         my $field4   = $4 || "";
         my $field5   = $5 || "";
         print $field1;
-        print($colors{"error_head_color"}, "$field2", color("reset"));
+        print_color("error_head_color", "$field2");
         print $field3, $field4;
-        print($colors{"error_message_color"}, "$field5\n", color("reset"));
+        print_color("error_message_color", "$field5");
+        print "\n";
     } elsif (/^(No\s+such\s+file\s+or\s+directory.*)
              /x) {
         # 'vlog' message:
         # No such file or directory. (errno = ENOENT)
         my $field1   = $1 || "";
-        print($colors{"error_message_color"}, "$field1\n", color("reset"));
+        print_color("error_message_color", "$field1");
+        print "\n";
     } elsif (error_summary_parser($_)) {
     } else {
         print;                  # Nothing found. Print current line without changes.
@@ -437,28 +441,29 @@ sub vopt_scan {
 
         print $field1;
         if ($error_type) {
-            print($colors{"error_head_color"}, "$field2", color("reset"));
+            print_color("error_head_color", "$field2");
         } else {
-            print($colors{"warning_head_color"}, "$field2", color("reset"));
+            print_color("warning_head_color", "$field2");
         }
         print $field3;
         if ($error_type) {
-            print($colors{"error_fname_color"}, "$field4", color("reset"));
+            print_color("error_fname_color", "$field4");
         } else {
-            print($colors{"warning_fname_color"}, "$field4", color("reset"));
+            print_color("warning_fname_color", "$field4");
         }
         print $field5;
         if ($error_type) {
-            print($colors{"error_line_num_color"}, "$field6", color("reset"));
+            print_color("error_line_num_color", "$field6");
         } else {
-            print($colors{"warning_line_num_color"}, "$field6", color("reset"));
+            print_color("warning_line_num_color", "$field6");
         }
         print $field7, $field8, $field9;
         if ($error_type) {
-            print($colors{"error_message_color"}, "$field10\n", color("reset"));
+            print_color("error_message_color", "$field10");
         } else {
-            print($colors{"warning_message_color"}, "$field10\n", color("reset"));
+            print_color("warning_message_color", "$field10");
         }
+        print "\n";
     } elsif (/^(\*\*\s+)
               # Title
               (Note)
@@ -471,18 +476,19 @@ sub vopt_scan {
         my $field3   = $3 || "";
         my $field4   = $4 || "";
         print $field1;
-        print($colors{"note_head_color"}, "$field2", color("reset"));
+        print_color("note_head_color", "$field2");
         print $field3;
-        print($colors{"note_message_color"}, "$field4", color("reset"));
+        print_color("note_message_color", "$field4");
         print "\n";
     } elsif (/^(No such file or directory.*)$/) {
-        print($colors{"error_head_color"}, $1, color("reset"), "\n");
+        print_color("error_head_color", $1, color);
     } elsif (/^(\s+For instance.*)$/) {
         # 'vopt' message:
         # For instance 'InstanceName' at path 'FullPath.InstanceName'
-        print($colors{"warning_message_color"}, $1, color("reset"), "\n");
+        print_color("warning_message_color", $1, color);
     } elsif (/^(Optimization failed.*)$/) {
-        print($colors{"error_head_color"}, $1, color("reset"), "\n");
+        print_color("error_head_color", "$1");
+        print "\n";
     } elsif (error_summary_parser($_)) {
     } else {
         print;                  # Nothing found. Print current line without changes.
@@ -610,28 +616,29 @@ sub vsim_scan {
             my $field10  = $10 || "";
             my $warning_type = $field2 eq "Warning";
 
+            print $field1;
             if ($warning_type) {
-                print($colors{"warning_head_color"}, "$field2", color("reset"));
+                print_color("warning_head_color", "$field2");
             } else {
-                print($colors{"note_head_color"}, "$field2", color("reset"));
+                print_color("note_head_color", "$field2");
             }
             print $field3;
             if ($warning_type) {
-                print($colors{"warning_fname_color"}, "$field4", color("reset"));
+                print_color("warning_fname_color", "$field4");
             } else {
-                print($colors{"note_fname_color"}, "$field4", color("reset"));
+                print_color("note_fname_color", "$field4");
             }
             print $field5;
             if ($warning_type) {
-                print($colors{"warning_line_num_color"}, "$field6", color("reset"));
+                print_color("warning_line_num_color", "$field6");
             } else {
-                print($colors{"note_line_num_color"}, "$field6", color("reset"));
+                print_color("note_line_num_color", "$field6");
             }
             print $field7, $field8, $field9;
             if ($warning_type) {
-                print($colors{"warning_message_color"}, "$field10", color("reset"));
+                print_color("warning_message_color", "$field10");
             } else {
-                print($colors{"note_message_color"}, "$field10", color("reset"));
+                print_color("note_message_color", "$field10");
             }
             print "\n";
         }
@@ -682,13 +689,14 @@ sub vsim_scan {
         my $field12  = $12 || "";
 
         print $field1;
-        print($colors{"error_head_color"}, "$field2", color("reset"));
+        print_color("error_head_color", "$field2");
         print $field3, $field4, $field5;
-        print($colors{"error_fname_color"}, "$field6", color("reset"));
+        print_color("error_fname_color", "$field6");
         print $field7;
-        print($colors{"error_line_num_color"}, "$field8", color("reset"));
+        print_color("error_line_num_color", "$field8");
         print $field9, $field10, $field11;
-        print($colors{"error_message_color"}, "$field12\n", color("reset"));
+        print_color("error_message_color", "$field12");
+        print "\n";
     } elsif (/^(\#\s+\*\*\s+)
               # Title
               (Fatal:|Error:|Warning:|Note:|Info:)
@@ -704,18 +712,18 @@ sub vsim_scan {
 
         print $field1;
         if ($note_type) {
-            print($colors{"note_head_color"}, "$field2", color("reset"));
+            print_color("note_head_color", "$field2");
         } elsif ($warning_type) {
-            print($colors{"warning_head_color"}, "$field2", color("reset"));
+            print_color("warning_head_color", "$field2");
         } else {
-            print($colors{"error_head_color"}, "$field2", color("reset"));
+            print_color("error_head_color", "$field2");
         }
         if ($note_type) {
-            print($colors{"note_message_color"}, "$field3", color("reset"));
+            print_color("note_message_color", "$field3");
         } elsif ($warning_type) {
-            print($colors{"warning_message_color"}, "$field3", color("reset"));
+            print_color("warning_message_color", "$field3");
         } else {
-            print($colors{"error_message_color"}, "$field3", color("reset"));
+            print_color("error_message_color", "$field3");
         }
         print "\n";
     } elsif (/^(\#\s+)
@@ -738,13 +746,13 @@ sub vsim_scan {
 
         print $field1;
         if ($error_num > 0) {
-            print($colors{"error_head_color"}, "${field2}$error_num", color("reset"));
+            print_color("error_head_color", "${field2}$error_num");
         } else {
             print $field2, $error_num;
         }
         print $field4;
         if ($warning_num > 0) {
-            print($colors{"warning_head_color"}, "${field5}$warning_num", color("reset"));
+            print_color("warning_head_color", "${field5}$warning_num");
         } else {
             print $field5, $warning_num;
         }
@@ -761,7 +769,7 @@ sub vsim_scan {
         my $field2    = $2 || "";
         my $field3    = $3 || "";
         print $field1;
-        print($colors{"error_head_color"}, "$field2", color("reset"));
+        print_color("error_head_color", "$field2");
         print $field3, "\n";
     } else {
         if (@vsim_hi_patterns &&
@@ -772,7 +780,8 @@ sub vsim_scan {
             while (my ($mask, $color) = splice(@patterns, 0, 2)) {
                 if ($str =~ /$mask/) {
                     chomp($str); # remove newline to prevent overlay color
-                    print(color($color), $str, color("reset"), "\n");
+                    print(color($color), $str, color("reset"));
+                    print "\n";
                     $match = 1;
                 }
             }
@@ -802,16 +811,20 @@ sub error_summary_parser {
         my $field4    = $4 || "";
         my $warning_num  = int($5) || 0;
         if ($error_num > 0) {
-            print($colors{"error_head_color"}, "${field1}$error_num", color("reset"));
+            print_color("error_head_color", "${field1}$error_num");
         } else {
             print $field1, $error_num;
         }
         print $field3;
         if ($warning_num > 0) {
-            print($colors{"warning_head_color"}, "${field4}$warning_num", color("reset"));
+            print_color("warning_head_color", "${field4}$warning_num");
         } else {
             print $field4, $warning_num;
         }
         print "\n";
     }
-} # error_summary_parser
+}                               # error_summary_parser
+
+sub print_color {
+    print($colors{$_[0]}, $_[1], color("reset"));
+}
