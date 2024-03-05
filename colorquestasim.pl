@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.2.2
+# Version: 1.2.3
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -162,8 +162,11 @@ my $cmd = $cmd_paths{$prog_name} || find_path($prog_name);
 
 my $terminal = $ENV{"TERM"} || "dumb";
 
-# If it's in the list of terminal types not to color - don't do color.
-if ($nocolor{$terminal}) {
+# Don't do color and parsing:
+# - if it's in the list of terminal types not to color
+# - if the environment variable COLORQUESTASIM contains one of the values: off, disable
+if ($nocolor{$terminal} ||
+    (defined $ENV{COLORQUESTASIM} && $ENV{COLORQUESTASIM} =~ /off|disable/)) {
     exec $cmd, @ARGV
         or die("Couldn't exec");
 }
@@ -193,7 +196,8 @@ if ($cmd_pid) {
 # Parsers
 #
 
-sub vlog_scan {
+sub vlog_scan
+{
     if (/^(\*\*\s+)
          # Title
          (Error|Warning|Note)
@@ -408,7 +412,8 @@ sub vlog_scan {
     }
 }                               # vlog_scan
 
-sub vopt_scan {
+sub vopt_scan
+{
     if (/^(\*\*\s+)
          # Title
          (Error|Warning)
@@ -497,7 +502,8 @@ sub vopt_scan {
     }
 }                               # vopt_scan
 
-sub vsim_scan {
+sub vsim_scan
+{
     state $copyright_scan = not vsim_option_is_true("show_vsim_copyright");
     state $copyrigth_detected = 0;
     state $run_do_file = 0;
@@ -798,7 +804,8 @@ sub vsim_scan {
     }                           # else
 }                               # vsim_scan
 
-sub error_summary_parser {
+sub error_summary_parser
+{
     if (/^(Errors:\s+)
          ([0-9]+)
          (,\s+)
@@ -829,10 +836,12 @@ sub error_summary_parser {
     }
 }                               # error_summary_parser
 
-sub print_color {
+sub print_color
+{
     print($colors{$_[0]}, $_[1], color("reset"));
 }
 
-sub trim {
+sub trim
+{
     $_[0] =~ s/^\s+|\s+$//g;
 }

@@ -27,9 +27,12 @@
 # environment variable
 # vlog: /opt/mentor/questasim_10.7c/questasim/bin/vlog
 
-# Don't do color if our terminal type ($TERM) is one of these.
+# Don't do color and parsing if our terminal type ($TERM) is one of these.
 # (List all terminal types on one line, seperated by whitespace.)
 # nocolor: dump xterm xterm-256color emacs
+
+# Don't do color and parsing if the environment variable COLORQUESTASIM contains one of the
+# values: off, disable
 
 # Notes
 note_head_color: bold blue
