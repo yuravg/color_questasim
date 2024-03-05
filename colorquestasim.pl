@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.2.1
+# Version: 1.2.2
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -100,6 +100,8 @@ sub load_configuration
         } elsif ($option eq "vsim_hi_patterns"
                  && $value ne ""
                  && $mask ne "") {
+            trim($mask);
+            trim($value);
             push(@vsim_hi_patterns, $mask, $value);
         } else {
             $cmd_paths{$option} = $value;
@@ -780,7 +782,9 @@ sub vsim_scan {
             while (my ($mask, $color) = splice(@patterns, 0, 2)) {
                 if ($str =~ /$mask/) {
                     chomp($str); # remove newline to prevent overlay color
-                    print(color($color), $str, color("reset"));
+                    eval {
+                        print(color($color), $str, color("reset"));
+                    } or do print $str, "(Waring: $0: Wrong 'vsim_hi_patterns' color options: <$color>)";
                     print "\n";
                     $match = 1;
                 }
@@ -827,4 +831,8 @@ sub error_summary_parser {
 
 sub print_color {
     print($colors{$_[0]}, $_[1], color("reset"));
+}
+
+sub trim {
+    $_[0] =~ s/^\s+|\s+$//g;
 }
