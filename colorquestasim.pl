@@ -3,7 +3,7 @@
 #
 # colorquestasim
 #
-# Version: 1.2.3
+# Version: 1.2.4
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -27,9 +27,13 @@ use File::Spec '';
 use Cwd 'abs_path';
 use Term::ANSIColor 'color';
 use feature 'state';
+use constant {
+    TRUE  => 1,
+    FALSE => 0,
+};
 
 
-my(%nocolor, %colors, %cmd_paths, %vsim_cfg, %highlight, @vsim_hi_patterns);
+my(%nocolor, %colors, %cmd_paths, %vsim_cfg, @vsim_hi_patterns);
 
 sub init_defaults
 {
@@ -48,25 +52,31 @@ sub init_defaults
     $colors{"error_line_num_color"}   = color("cyan");
     $colors{"error_message_color"}    = color("cyan");
 
-    $vsim_cfg{"show_vsim_copyright"}    = "true";
-    $vsim_cfg{"show_vsim_start_cmd"}    = "true";
-    $vsim_cfg{"show_vsim_start_time"}   = "true";
-    $vsim_cfg{"show_vsim_loading_libs"} = "true";
+    $vsim_cfg{"show_vsim_copyright"}    = TRUE;
+    $vsim_cfg{"show_vsim_start_cmd"}    = TRUE;
+    $vsim_cfg{"show_vsim_start_time"}   = TRUE;
+    $vsim_cfg{"show_vsim_loading_libs"} = TRUE;
 
-    $vsim_cfg{"show_vsim_uvm_relnotes"}  = "true";
-    $vsim_cfg{"show_questa_uvm_pkg_rpt"} = "true";
+    $vsim_cfg{"show_vsim_uvm_relnotes"}  = TRUE;
+    $vsim_cfg{"show_questa_uvm_pkg_rpt"} = TRUE;
 
-    $highlight{"vsim_hi_patterns_en"} = "no";
+    $vsim_cfg{"vsim_hi_patterns_en"} = FALSE;
 }
 
-sub get_logical_option
+sub set_logical_option
 {
-    return /true|yes/ ? "true" : "no";
+    my $ref = shift;
+    $_ = shift;
+    if (/^(true|yes)$/) {
+        $$ref = TRUE;
+    } elsif (/^(false|no)$/) {
+        $$ref = FALSE;
+    }
 }
 
 sub vsim_option_is_true
 {
-    return ($vsim_cfg{$_[0]} =~ /true/) ? 1 : 0;
+    return $vsim_cfg{$_[0]} ? TRUE : FALSE;
 }
 
 sub load_configuration
@@ -84,6 +94,9 @@ sub load_configuration
         my $option = $1;
         my $value = $2;
         my $mask = $4 || "";
+        trim($option);
+        trim($value);
+        trim($mask);
 
         if ($option eq "nocolor") {
             # The nocolor option lists terminal types, separated by
@@ -94,14 +107,10 @@ sub load_configuration
         } elsif (defined $colors{$option}) {
             $colors{$option} = color($value);
         } elsif (defined $vsim_cfg{$option}) {
-            $vsim_cfg{$option} = get_logical_option("$value");
-        } elsif (defined $highlight{$option}) {
-            $highlight{$option} = "$value";
-        } elsif ($option eq "vsim_hi_patterns"
-                 && $value ne ""
-                 && $mask ne "") {
-            trim($mask);
-            trim($value);
+            set_logical_option(\$vsim_cfg{$option}, $value)
+        } elsif (($option =~ /^vsim_hi_patterns$/) &&
+                 $value ne "" &&
+                 $mask ne "") {
             push(@vsim_hi_patterns, $mask, $value);
         } else {
             $cmd_paths{$option} = $value;
@@ -781,7 +790,7 @@ sub vsim_scan
         print $field3, "\n";
     } else {
         if (@vsim_hi_patterns &&
-            $highlight{"vsim_hi_patterns_en"} eq "true") {
+            vsim_option_is_true("vsim_hi_patterns_en")) {
             my $str = $_;
             my $match = 0;
             my @patterns = @vsim_hi_patterns;
