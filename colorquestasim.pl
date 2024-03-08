@@ -3,7 +3,11 @@
 #
 # colorquestasim
 #
-# Version: 1.2.4
+
+use warnings;
+use strict;
+use constant VERSION => "1.2.5";
+
 #
 #
 # A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
@@ -17,9 +21,6 @@
 # License: MIT License
 #
 
-use warnings;
-use strict;
-
 use List::Util 'first';
 use IPC::Open3 'open3';
 use File::Basename 'fileparse';
@@ -32,6 +33,10 @@ use constant {
     FALSE => 0,
 };
 
+if (defined $ARGV[0] &&
+    $ARGV[0] =~ /^(--version)$/) {
+    print "colorquestasim ", VERSION, " $0\n" and exit;
+}
 
 my(%nocolor, %colors, %cmd_paths, %vsim_cfg, @vsim_hi_patterns);
 
