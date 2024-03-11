@@ -1,15 +1,30 @@
 # Color QuestaSim (colorquestasim)
 
-A wrapper to colorize the output from Mentor Graphics QuestaSim messages.
+A wrapper for colorizing the output of Mentor Graphics QuestaSim messages.
 
-# Install
+![Screenshot](image/Screenshot.png "Screenshot")
 
-- Copy [colorquestasim.pl](colorquestasim.pl) in a directory of your choice.
-- Create symbol links pointing to `colorquestasim.pl`. This link must be named as the name of
-  the QuestaSim command.  The directory where these links are created must be placed in `$PATH`
-  **before** the directory where the QuestaSim commands lives.
+## Table of Contents
 
-Example:
+1. [Installation](#installation)
+2. [Configuration](#configuration)
+3. [Usage](#usage)
+   3.1. [Common](#common)
+   3.2. [Get Script Version](#get-script-version)
+4. [Known Issues](#known-issues)
+5. [Reference](#reference)
+
+## Installation
+
+Supported OS: Linux, Windows (MinGW)
+
+1. Copy the [colorquestasim.pl](colorquestasim.pl) file to a directory of your choice.
+2. Create symbolic links pointing to `colorquestasim.pl`. Name these links the same as the
+QuestaSim command names. Place these links in a directory that is included in your `$PATH`
+environment variable **before** the directory containing the actual QuestaSim commands.
+
+### Example installation for Linux
+
 ```bash
 cp colorquestasim.pl ~/bin/
 cd ~/bin
@@ -19,18 +34,43 @@ ln -s colorquestasim.pl vsim
 export PATH="$HOME/bin:$PATH"
 ```
 
-# Configuration
+### Example installation for Windows (MinGW)
 
-The default settings can be overridden with `~/.colorquestasim` or
-`~/.colorquestasim_<os_type>`.
+```bash
+cp colorquestasim.pl ~/bin/vlog
+cp colorquestasim.pl ~/bin/vopt
+cp colorquestasim.pl ~/bin/vsim
+export PATH="$HOME/bin:$PATH"
+```
 
-See the comments in the sample [colorquestasim.txt](colorquestasim.txt) for more information.
+## Configuration
 
-![Screenshot](image/Screenshot.png "Screenshot")
+You can override the default settings by creating a configuration file named `~/.colorquestasim`
+or `~/.colorquestasim_<os_type>`. For more information on available settings, refer to the
+comments in the [colorquestasim.txt](colorquestasim.txt) sample file.
 
-# Known Issues
+## Usage
 
+### Common
+
+Use the QuestaSim `vlog`, `vopt`, or `vsim` commands as you normally would. The `colorquestasim`
+wrapper will automatically colorize the output.
+
+### Get Script Version
+
+To get the version of the script, run:
+
+```bash
+<vlog/vopt/vsim> --version
+```
+
+Replace `<vlog/vopt/vsim>` with the corresponding symlink created during the installation of the
+script (e.g., `vlog`, `vopt`, or `vsim`).
+
+## Known Issues
+
+For a list of known issues with QuestaSim version 10.7c on Windows OS (MinGW), see the
 [Issues for QuestaSim version 10.7c on Window OS (MinGW)](issues_questasim10c7_mingw.md)
 
-# Reference
-[colorgcc](https://github.com/colorgcc/colorgcc)
+## Reference
+This project was inspired by [colorgcc](https://github.com/colorgcc/colorgcc).
