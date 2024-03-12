@@ -6,7 +6,7 @@
 
 use warnings;
 use strict;
-use constant VERSION => "1.2.5";
+use constant VERSION => "1.2.6";
 
 #
 #
@@ -189,7 +189,10 @@ my $output;
 my $cmd_pid = open3('<&STDIN', $output, $output, $cmd, @ARGV);
 
 while (<$output>) {
-    if ($prog_name eq "vlog") {
+    if (defined $ARGV[0] &&
+        $ARGV[0] =~ /^(-version|-h|-help)$/) {
+        print;
+    } elsif ($prog_name eq "vlog") {
         vlog_scan($_);
     } elsif ($prog_name eq "vopt") {
         vopt_scan($_);
