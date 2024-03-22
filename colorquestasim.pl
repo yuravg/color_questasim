@@ -6,7 +6,7 @@
 
 use warnings;
 use strict;
-use constant VERSION => "1.2.6";
+use constant VERSION => "1.2.7";
 
 #
 #
@@ -176,11 +176,23 @@ my $cmd = $cmd_paths{$prog_name} || find_path($prog_name);
 
 my $terminal = $ENV{"TERM"} || "dumb";
 
-# Don't do color and parsing:
-# - if it's in the list of terminal types not to color
-# - if the environment variable COLORQUESTASIM contains one of the values: off, disable
+my $parsing_disable = 0;
+my $regex_parsing_disable = qr/^--(off|disable)$/;
+
+# Remove the 'colorquestasim' argument(s) from the list of command line arguments
+@ARGV = grep {
+    my $keep = !/$regex_parsing_disable/;
+    $parsing_disable = 1 unless $keep;
+    $keep;
+} @ARGV;
+
+# Do not color and parsing:
+# - if it is in the list of terminal types that should not be colored
+# - if the COLORQUESTASIM environment variable contains one of the values: off, disable
+# - if the vlog/vopt/vsim commands are run with one of the arguments: --off --disable
 if ($nocolor{$terminal} ||
-    (defined $ENV{COLORQUESTASIM} && $ENV{COLORQUESTASIM} =~ /off|disable/)) {
+    (defined $ENV{COLORQUESTASIM} && $ENV{COLORQUESTASIM} =~ /off|disable/) ||
+    $parsing_disable) {
     exec $cmd, @ARGV
         or die("Couldn't exec");
 }
