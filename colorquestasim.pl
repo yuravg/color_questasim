@@ -6,7 +6,7 @@
 
 use warnings;
 use strict;
-use constant VERSION => "1.2.7";
+use constant VERSION => "1.2.8";
 
 #
 #
@@ -201,6 +201,10 @@ my $output;
 my $cmd_pid = open3('<&STDIN', $output, $output, $cmd, @ARGV);
 
 while (<$output>) {
+    # Remove the 0xOD character that is appended (?!) to the argument string
+    # in the emacs terminal in Windows OS
+    s/\x0D//g;
+
     if (defined $ARGV[0] &&
         $ARGV[0] =~ /^(-version|-h|-help)$/) {
         print;
