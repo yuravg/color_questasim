@@ -64,5 +64,14 @@ show_questa_uvm_pkg_rpt: no
 # Highlight patterns
 vsim_hi_patterns_en: yes
 # <option_name>: <color> : <regular-expressions>
-vsim_hi_patterns: underline    : ^# UVM_INFO @ 0: reporter \[RNTST\] Running test
-vsim_hi_patterns: black on_red : ^# (UVM_ERROR|UVM_FATAL)\s+[^:]
+# UVM test messages
+vsim_hi_patterns: underline      : ^# UVM_INFO @ 0: reporter \[RNTST\] Running test
+vsim_hi_patterns: cyan           : ^# (UVM_WARNING)\s+[^:]
+vsim_hi_patterns: red            : ^# (UVM_ERROR|UVM_FATAL)\s+[^:]
+# UVM report messages
+vsim_hi_patterns: black on_cyan  : ^# (UVM_WARNING)\s+:\s+[1-9][0-9]?+
+vsim_hi_patterns: yellow on_red  : ^# (UVM_ERROR|UVM_FATAL)\s+:\s+[1-9][0-9]?+
+vsim_hi_patterns: yellow on_red  : ^# \[!! UVM TEST FAILED !!\]
+vsim_hi_patterns: black on_green : ^# \[\*\* UVM TEST PASSED \*\*\]
+# Exiting a UVM test without completing it
+vsim_hi_patterns: cyan           : ^#\s+exit
