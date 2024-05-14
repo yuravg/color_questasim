@@ -6,7 +6,7 @@
 
 use warnings;
 use strict;
-use constant VERSION => "1.2.9";
+use constant VERSION => "1.2.10";
 
 #
 #
@@ -36,6 +36,31 @@ use constant {
 if (defined $ARGV[0] &&
     $ARGV[0] =~ /^(--version)$/) {
     print "colorquestasim ", VERSION, " $0\n" and exit;
+}
+
+if (defined $ARGV[0] &&
+    $ARGV[0] =~ /^(--help)$/) {
+    print_usage() and exit;
+}
+
+sub print_usage {
+    my $prog_name = fileparse $0;
+    print <<"END_USAGE";
+Usage: $prog_name [$prog_name-options] [wrapper-options]
+
+Description:
+  colorquestasim is a wrapper script (used via a symbolic link)
+  to colorize the output from Mentor Graphics QuestaSim messages.
+
+$prog_name-Options:
+  $prog_name specific options.
+  For more information on these options, run: $prog_name -help
+
+Wrapper-Options:
+  --off, --disable      Do not do color and parsing $prog_name output
+  --version             Display the script version and exit
+  --help                Display this help message and exit
+END_USAGE
 }
 
 my(%nocolor, %colors, %cmd_paths, %vsim_cfg, @vsim_hi_patterns);
