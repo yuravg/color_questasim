@@ -6,7 +6,7 @@
 
 use warnings;
 use strict;
-use constant VERSION => "1.2.8";
+use constant VERSION => "1.2.9";
 
 #
 #
@@ -629,9 +629,8 @@ sub vsim_scan
         } elsif (/^(\#\s+\*\*\s+)
                   # Title
                   (Note|Warning)
-                  (:)
+                  (:\s+)
                   (?:
-                      \s+
                       # File name
                       ([A-z0-9._\/-]+)
                       # Line number and round brackets
