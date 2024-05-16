@@ -6,7 +6,7 @@
 
 use warnings;
 use strict;
-use constant VERSION => "1.2.10";
+use constant VERSION => "1.2.11";
 
 #
 #
@@ -718,6 +718,15 @@ sub vsim_scan
         # UVM_INFO verilog_src/questa_uvm_pkg-...
     } elsif ($uvm_relnotes_scan && $uvm_relnotes_detected) {
         # Skip UVM release notes message
+        if (/^(\#\s+UVM_WARNING)(.*)$/) {
+            # 'vsim' messages:
+            # UVM_WARNING @ 0: Message...
+            my $field1 = $1 || "";
+            my $field2 = $2 || "";
+            print_color("warning_head_color", "$field1");
+            print_color("warning_message_color", "$field2");
+            print "\n";
+        }
     } elsif (/^(\#\s+\*\*\s+)
               # Title
               (Error)
