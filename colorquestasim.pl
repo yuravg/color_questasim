@@ -6,7 +6,7 @@
 
 use warnings;
 use strict;
-use constant VERSION => "1.2.11";
+use constant VERSION => "1.2.12";
 
 #
 #
@@ -660,15 +660,17 @@ sub vsim_scan
                       ([A-z0-9._\/-]+)
                       # Line number and round brackets
                       (\()([0-9]+)(\))
-                      (:)
+                      (:\s+)
                   )?
                   # vlog Num
-                  (\s+\([^)]+\))
+                  (\([^)]+\))?
                   # Message
                   (.*)$/x) {
             # 'vsim' messages:
             # "** Note: (vsim-or-vopt-Num) Message"
             # "** Warning: FileName(LineNum): (vlog-Num) Message."
+            # "** Warning: Message"
+            # "** Note: Message"
             my $field1   = $1 || "";
             my $field2   = $2 || "";
             my $field3   = $3 || "";
