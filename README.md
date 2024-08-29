@@ -1,6 +1,8 @@
 # Color QuestaSim (colorquestasim)
 
 A wrapper for colorizing the output of Mentor Graphics QuestaSim messages.
+The script also allows you to hide some QuestaSim messages (such as: Copyright, Loading Libs,
+running command, start time, UVM relnotes, UVM packages load).
 
 ![Screenshot](image/Screenshot.png "Screenshot")
 
