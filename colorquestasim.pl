@@ -6,7 +6,7 @@
 
 use warnings;
 use strict;
-use constant VERSION => "1.2.12";
+use constant VERSION => "1.2.13";
 
 #
 #
@@ -847,6 +847,23 @@ sub vsim_scan
         print $field1;
         print_color("error_head_color", "$field2");
         print $field3, "\n";
+    } elsif (/^(\#\s+)
+              # Title
+              # (Fatal)
+              (Fatal\s+error|Fatal|Stopped)
+              # Message
+              (.*)$/x) {
+        # 'vsim' message:
+        # "# Fatal error Message"
+        # "# Sopped at Message"
+        my $field1   = $1 || "";
+        my $field2   = $2 || "";
+        my $field3   = $3 || "";
+
+        print $field1;
+        print_color("error_head_color", "$field2");
+        print_color("error_message_color", "$field3");
+        print "\n";
     } else {
         if (@vsim_hi_patterns &&
             vsim_option_is_true("vsim_hi_patterns_en")) {
