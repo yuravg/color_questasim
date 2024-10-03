@@ -10,8 +10,8 @@ running command, start time, UVM relnotes, UVM packages load).
 
 1. [Installation](#installation)
 2. [Configuration](#configuration)
-3. [Usage](#usage)
-   3.1. [Common](#common)
+3. [Usage](#usage)\
+   3.1. [Common](#common)\
    3.2. [Get Script Version](#get-script-version)
 4. [Known Issues](#known-issues)
 5. [Reference](#reference)
