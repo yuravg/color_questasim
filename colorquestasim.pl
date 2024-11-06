@@ -6,7 +6,7 @@
 
 use warnings;
 use strict;
-use constant VERSION => "1.2.13";
+use constant VERSION => "1.2.14";
 
 #
 #
@@ -21,13 +21,12 @@ use constant VERSION => "1.2.13";
 # License: MIT License
 #
 
-use List::Util 'first';
-use IPC::Open3 'open3';
-use File::Basename 'fileparse';
-use File::Spec '';
-use Cwd 'abs_path';
-use Term::ANSIColor 'color';
-use feature 'state';
+use List::Util qw(first);
+use IPC::Open3 qw(open3);
+use File::Basename qw(fileparse);
+use File::Spec ();
+use Term::ANSIColor qw(color);
+use feature qw(state);
 use constant {
     TRUE  => 1,
     FALSE => 0,
