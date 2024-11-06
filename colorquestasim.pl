@@ -6,7 +6,7 @@
 
 use warnings;
 use strict;
-use constant VERSION => "1.2.14";
+use constant VERSION => "1.2.15";
 
 #
 #
@@ -708,6 +708,10 @@ sub vsim_scan
             }
             print "\n";
         }
+    } elsif (/^#\s+vsim_stacktrace.*written\s+$/) {
+        # 'vsim' messages:
+        # vsim_stacktrace.vstf written
+        print_color("error_head_color", $_);
     } elsif ($loading_scan &&
              /^#\s+(Loading|Compiling)\s+/) {
         # 'vsim' messages:
